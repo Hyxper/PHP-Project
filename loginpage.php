@@ -4,39 +4,43 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/styles.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <link href="/styles.css" rel="sylesheet">
     <title>Login Page</title>
+
+
 </head>
 <body>
-<div id="login">
-        <h3 class="text-center text-white pt-5">Login form</h3>
-        <div class="container">
-            <div id="login-row" class="row justify-content-center align-items-center">
-                <div id="login-column" class="col-md-6">
-                    <div id="login-box" class="col-md-12">
-                        <form id="login-form" class="form" action="" method="post">
-                            <h3 class="text-center text-info">Login</h3>
-                            <div class="form-group">
-                                <label for="username" class="text-info">Username:</label><br>
-                                <input type="text" name="username" id="username" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="password" class="text-info">Password:</label><br>
-                                <input type="text" name="password" id="password" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="remember-me" class="text-info"><span>Remember me</span> <span><input id="remember-me" name="remember-me" type="checkbox"></span></label><br>
-                                <input type="submit" name="submit" class="btn btn-info btn-md" value="submit">
-                            </div>
-                            <div id="register-link" class="text-right">
-                                <a href="#" class="text-info">Register here</a>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+<form action="results.php" method="$_POST">
+<section class="vh-100 gradient-custom">
+  <div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-6">
+        <div class="card bg-dark text-white" style="border-radius: 1rem;">
+          <div class="card-body px-2 text-center d-flex justify-content-center">
+            <div class="w-50">
+              <h2 class="fw-bold mb-2 text-uppercase">Login</h2>
+              <p class="text-white-50 mb-5">Please enter your username and password.</p>
+              <div class="form-outline form-white mb-4">
+
+                <input type="text" id="typeUID" name ="username"class="form-control form-control-lg" />
+                <label class="form-label" for="typeUID">Username</label>
+
+              </div>
+              <div class="form-outline form-white mb-4">
+
+                <input type="password" id="typePassword" name ="password" class="form-control form-control-lg" />
+                <label class="form-label" for="typePassword">Password</label>
+
+              </div>
+              <button class="btn btn-outline-light btn-lg px-5" type="submit" name="submit">Login</button>
             </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
+</section>
+</form>
 </body>
 </html>
