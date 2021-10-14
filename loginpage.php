@@ -11,29 +11,49 @@
 
 </head>
 <body>
-<form action="results.php" method="$_POST">
-<section class="vh-100 gradient-custom">
+<form action="verifyuser.php" method="POST">
+<section class="vh-100">
   <div class="container py-5 h-100">
     <div class="row d-flex justify-content-center align-items-center h-100">
       <div class="col-6">
         <div class="card bg-dark text-white" style="border-radius: 1rem;">
           <div class="card-body px-2 text-center d-flex justify-content-center">
             <div class="w-50">
+                
               <h2 class="fw-bold mb-2 text-uppercase">Login</h2>
-              <p class="text-white-50 mb-5">Please enter your username and password.</p>
-              <div class="form-outline form-white mb-4">
 
-                <input type="text" id="typeUID" name ="username"class="form-control form-control-lg" />
+              <p class="text-white-50 mb-2">Please enter your username and password.</p>
+              
+                <?php
+                session_start();
+                if(isset($_SESSION["usercreds"])){ 
+                    if($_SESSION["usercreds"] == 1){
+                        echo
+                      "<div class='alert alert-danger' role='alert'>
+                        User not found!
+                      </div>";
+                       session_destroy();
+                    }elseif($_SESSION["usercreds"] == 2){
+                        echo
+                      "<div class='alert alert-danger' role='alert'>
+                        Invalid Password!
+                      </div>";
+                      session_destroy();    
+                    }   
+                }
+                ?>
+              <div class="form-outline form-white">
+                <input type="text" id="typeUID" name ="username" class="form-control form-control-lg" required autofocus> <!-- added required so form cant process if empty -->
                 <label class="form-label" for="typeUID">Username</label>
-
               </div>
-              <div class="form-outline form-white mb-4">
 
-                <input type="password" id="typePassword" name ="password" class="form-control form-control-lg" />
+              <div class="form-outline form-white">
+                <input type="password" id="typePassword" name ="password" class="form-control form-control-lg" required> <!-- added required so form cant process if empty -->
                 <label class="form-label" for="typePassword">Password</label>
-
               </div>
+
               <button class="btn btn-outline-light btn-lg px-5" type="submit" name="submit">Login</button>
+
             </div>
           </div>
         </div>
