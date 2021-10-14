@@ -2,7 +2,11 @@
 
 session_start();
 
-$logindetails = array("username"=> $_POST["username"],"password" => $_POST["password"]);
+$logindetails = array("username"=> $_POST["username"],"password" => $_POST["password"]); // what to check
+
+//read JSON
+$json = file_get_contents("./users.json");
+$userdata = json_decode($json,true);
 
 
 if($logindetails["username"] != "Admin"){

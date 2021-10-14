@@ -1,0 +1,46 @@
+{
+   
+
+	{
+		"username": "Admin",
+        "password": "password",
+        "permission": "admin"
+	},
+
+	{
+		"username": "User",
+        "password": "password",
+        "permission": "stanard"
+	},
+
+    {
+		"username": "user1",
+        "password": "password",
+        "permission": "restricted"
+	},
+    
+    {
+		"username": "user2",
+        "password": "password",
+        "permission": "restricted"
+	},
+
+    {
+		"username": "user3",
+        "password": "password",
+        "permission": "restricted"
+	},
+
+    {
+		"username": "user4",
+        "password": "password",
+        "permission": "restricted"
+	},
+
+    {
+		"username": "user5",
+        "password": "password",
+        "permission": "restricted"
+	},
+
+}
