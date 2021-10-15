@@ -1,5 +1,5 @@
-{
-   
+
+ [  
 
 	{
 		"username": "Admin",
@@ -10,7 +10,7 @@
 	{
 		"username": "User",
         "password": "password",
-        "permission": "stanard"
+        "permission": "standard"
 	},
 
     {
@@ -41,6 +41,6 @@
 		"username": "user5",
         "password": "password",
         "permission": "restricted"
-	},
+	}
 
-}
+ ]

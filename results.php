@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 // print_r($_GET);
 // exit;
 
@@ -11,7 +11,11 @@
 $userdata = array();
 $json = file_get_contents("./users.json");
 $userdata = json_decode($json,true);
-
-print_r($userdata);
+// echo "<pre>";
+// print_r($_SESSION["userdetails"]);
+// echo "</pre>";
+echo "<pre>";
+print_r($_SESSION["userdetails"]);
+echo "</pre>";
 
 ?>

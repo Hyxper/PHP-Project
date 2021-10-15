@@ -32,6 +32,7 @@
                       "<div class='alert alert-danger' role='alert'>
                         User not found!
                       </div>";
+                      
                        session_destroy();
                     }elseif($_SESSION["usercreds"] == 2){
                         echo
