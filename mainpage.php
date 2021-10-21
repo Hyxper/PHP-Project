@@ -20,13 +20,18 @@
         // print_r(calculate_standard_tax($personel["7265_Robert_Holder"],$tax_information));
         // echo "</pre>";
 
-        echo "<pre>";
-        print_r($personel);
-        echo "</pre>";
+
+        foreach($personel as $key => $person){
+            echo $key;
+            echo "<pre>";
+            print_r(calculate_standard_tax($person,$tax_information));
+            echo "</pre>";
+        }
+      
         
-        echo "<pre>";
-        print_r($tax_information);
-        echo "</pre>";
+        // echo "<pre>";
+        // print_r($tax_information);
+        // echo "</pre>";
     
     
     //    echo calculate_standard_tax($personel["7265_Robert_Holder"]);

@@ -81,10 +81,7 @@ function calculate_standard_tax($person, $tax_info){
         $salary_total -= $tax_deductable;
         return $salary_total;
     //should be the end here
+    }
 }
-
-
-
-
 
 ?>
