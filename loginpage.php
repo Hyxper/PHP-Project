@@ -32,7 +32,7 @@
                       "<div class='alert alert-danger' role='alert'>
                         User not found!
                       </div>";
-                      
+
                        session_destroy();
                     }elseif($_SESSION["usercreds"] == 2){
                         echo
@@ -43,6 +43,7 @@
                     }   
                 }
                 ?>
+                
               <div class="form-outline form-white">
                 <input type="text" id="typeUID" name ="username" class="form-control form-control-lg" required autofocus> <!-- added required so form cant process if empty -->
                 <label class="form-label" for="typeUID">Username</label>
