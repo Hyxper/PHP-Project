@@ -13,13 +13,23 @@
     <?php
         require __DIR__ . '/functions.php';
 
+        $personel = create_personel_data();
+        $tax_information = create_tax_data();
+
+        // echo "<pre>";
+        // print_r(calculate_standard_tax($personel["7265_Robert_Holder"],$tax_information));
+        // echo "</pre>";
+
         echo "<pre>";
-        print_r(create_personel_data());
+        print_r($personel);
+        echo "</pre>";
+        
+        echo "<pre>";
+        print_r($tax_information);
         echo "</pre>";
     
-      
-
     
+    //    echo calculate_standard_tax($personel["7265_Robert_Holder"]);
         
 
     ?>
