@@ -17,18 +17,32 @@
         $tax_information = create_tax_data();
 
         // echo "<pre>";
-        // print_r(calculate_standard_tax($personel["7265_Robert_Holder"],$tax_information));
+     
+        // echo "is not supported. Supported functions are:<br>";
+        // echo "<ul>";
+        // foreach(check_currency_functions() as $function){
+        //     echo "<li>".$function."</li>";
+        // }
+        // echo "</ul>";
+        // // print_r($user_defined_funcs[0]);
+        process_value(10000,"yen");
+        
+
         // echo "</pre>";
 
        
-        foreach($personel as $key => $person){
-            echo $key;
-            echo "<pre>";
-            echo calculate_standard_tax($person,$tax_information,"GBP");
-            echo "</pre>";
-        }
+        // foreach($personel as $key => $person){
+        //     echo $key;
+        //     echo "<pre>";
+        //     echo calculate_standard_tax($person,$tax_information,"GBP");
+        //     echo "</pre>";
+        // }
 
-        
+      
+
+
+
+     
       
         //$formattedcost = '£' . number_format( (float) $costcounter, 2, '.', ',' ); //chose this because I dont like number format
         // echo "<pre>";
