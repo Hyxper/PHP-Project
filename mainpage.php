@@ -20,14 +20,15 @@
         // print_r(calculate_standard_tax($personel["7265_Robert_Holder"],$tax_information));
         // echo "</pre>";
 
-
+       
         foreach($personel as $key => $person){
             echo $key;
             echo "<pre>";
-            echo '£' . number_format( (float) calculate_standard_tax($person,$tax_information), 2, '.', ',' );
-            // print_r(calculate_standard_tax($person,$tax_information));
+            echo calculate_standard_tax($person,$tax_information,"GBP");
             echo "</pre>";
         }
+
+        
       
         //$formattedcost = '£' . number_format( (float) $costcounter, 2, '.', ',' ); //chose this because I dont like number format
         // echo "<pre>";
