@@ -47,18 +47,21 @@ function create_tax_data(){
 
 
 function calculate_standard_tax($person, $tax_info){
-    $salary = $person["salary"];
-    $salary_total = $salary;
-    $tax_band = $person["tax_band"];
-    $tax_deductable =0.0;
+    $salary = (float) $person["salary"]; //this is used to deduct max salary of tax bands to work out each stage
+    $salary_total = (float) $salary; //this is used when a persons tax band is identified, to work out their salary after tax
+    $tax_band = $person["tax_band"]; //persons tax band
+    $tax_deductable =0.00; //total of how much tax to deduct from salary_total
 
     if($tax_band == "tax_band_1"){
         return $salary_total;
     }else{
+        if($tax_band=="tax_band_4"){ //reduces person tax free allowance by 50% if tax band is 4
+            $salary -= 5000;
+        }else{
         $salary -= 10000;
+        }
     }
-    
-    if($tax_band=="tax_band_2"){
+    if($tax_band=="tax_band_2"){ //these sections return to the call, identifies person tax band and calculates accordingly
         $tax_deductable += $salary*($tax_info["tax_band_2"]["rate"]/100);
         $salary_total -= $tax_deductable;
         return $salary_total;
@@ -80,8 +83,11 @@ function calculate_standard_tax($person, $tax_info){
         $tax_deductable += $salary*($tax_info["tax_band_4"]["rate"]/100);
         $salary_total -= $tax_deductable;
         return $salary_total;
-    //should be the end here
+    //should be the end here //IF PERSON IS TAX BAND 4, £10K TAX FREE ALLOWANCE IS REDUCED TO £5K.
     }
 }
+
+
+//$formattedcost = '£' . number_format( (float) $costcounter, 2, '.', ',' ); //chose this because I dont like number format
 
 ?>

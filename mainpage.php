@@ -24,11 +24,12 @@
         foreach($personel as $key => $person){
             echo $key;
             echo "<pre>";
-            print_r(calculate_standard_tax($person,$tax_information));
+            echo '£' . number_format( (float) calculate_standard_tax($person,$tax_information), 2, '.', ',' );
+            // print_r(calculate_standard_tax($person,$tax_information));
             echo "</pre>";
         }
       
-        
+        //$formattedcost = '£' . number_format( (float) $costcounter, 2, '.', ',' ); //chose this because I dont like number format
         // echo "<pre>";
         // print_r($tax_information);
         // echo "</pre>";
