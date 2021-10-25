@@ -25,23 +25,21 @@
         // }
         // echo "</ul>";
         // // print_r($user_defined_funcs[0]);
-        process_value(10000,"yen");
-        
+    //    $currency = "";
+
+    //    if(!$currency){
+    //        echo "blank";
+    //    }
 
         // echo "</pre>";
 
-       
-        // foreach($personel as $key => $person){
-        //     echo $key;
-        //     echo "<pre>";
-        //     echo calculate_standard_tax($person,$tax_information,"GBP");
-        //     echo "</pre>";
-        // }
+        foreach($personel as $person){
+        print_r(calculate_standard_tax($person,$tax_information,"GBP"));
+        echo "<br>";
+        }
 
       
-
-
-
+       
      
       
         //$formattedcost = '£' . number_format( (float) $costcounter, 2, '.', ',' ); //chose this because I dont like number format
