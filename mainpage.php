@@ -33,23 +33,167 @@
 
         // echo "</pre>";
 
-        foreach($personel as $person){
-        print_r(calculate_standard_tax($person,$tax_information,"GBP"));
-        echo "<br>";
-        }
+        // foreach($personel as $person){
+        // print_r(calculate_standard_tax($person,$tax_information));
+        // echo "<br>";
+        // }
 
-      
-       
-     
-      
-        //$formattedcost = '£' . number_format( (float) $costcounter, 2, '.', ',' ); //chose this because I dont like number format
-        // echo "<pre>";
-        // print_r($tax_information);
-        // echo "</pre>";
-    
-    
-    //    echo calculate_standard_tax($personel["7265_Robert_Holder"]);
+
+
+
+
+
+
+
+
+//         function currency_conversion($currency_convert_from){
+//         $arrayofconversion = array();
+//         $availablecurrencies = array();
+//         $api_key = "04f44a4054msh92583eb306794d9p1f7b99jsn27c76c1fd7d8";
         
+//         $curl = curl_init();
+
+//         curl_setopt_array($curl, [
+//             CURLOPT_URL => "https://currency-exchange.p.rapidapi.com/listquotes",
+//             CURLOPT_RETURNTRANSFER => true,
+//             CURLOPT_FOLLOWLOCATION => true,
+//             CURLOPT_ENCODING => "",
+//             CURLOPT_MAXREDIRS => 10,
+//             CURLOPT_TIMEOUT => 30,
+//             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+//             CURLOPT_CUSTOMREQUEST => "GET",
+//             CURLOPT_HTTPHEADER => [
+//                 "x-rapidapi-host: currency-exchange.p.rapidapi.com",
+//                 "x-rapidapi-key: ".$api_key
+//             ],
+//         ]);
+//         $response = curl_exec($curl);
+//         $err = curl_error($curl);
+//         curl_close($curl);
+//         if ($err) {
+//             echo "cURL Error when checking available currencies on API #:" . $err;
+//         } else {
+            
+//         }
+        
+//         foreach($availablecurrencies as $currency){
+//             if($currency == $currency_convert_from){
+//                 throw new Exception (available_functions($availablecurrencies,"'".$currency_convert_from."' is not supported by API. Supported currencies are:"));
+//             }
+//         }
+
+
+//         foreach(check_currency_functions() as $function){
+//         $currency_convert_to = strtoupper(substr($function,-3));   
+//         $curl = curl_init();
+//         curl_setopt_array($curl, [
+//             CURLOPT_URL => "https://currency-exchange.p.rapidapi.com/exchange?from=".$currency_convert_from."&to=".$currency_convert_to,
+//             // CURLOPT_URL => "https://currency-exchange.p.rapidapi.com/exchange?from=SGD&to=USD&q=1.0",
+//             CURLOPT_RETURNTRANSFER => true,
+//             CURLOPT_FOLLOWLOCATION => true,
+//             CURLOPT_ENCODING => "",
+//             CURLOPT_MAXREDIRS => 10,
+//             CURLOPT_TIMEOUT => 30,
+//             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+//             CURLOPT_CUSTOMREQUEST => "GET",
+//             CURLOPT_HTTPHEADER => [
+//                 "x-rapidapi-host: currency-exchange.p.rapidapi.com",
+//                 "x-rapidapi-key: ".$api_key
+//             ],
+//         ]);
+//         $response = curl_exec($curl);
+//         $err = curl_error($curl);
+//         curl_close($curl);    
+//         if ($err) {
+//             echo "cURL Error #:" . $err;
+//         } else {
+//             $arrayofconversion[$currency_convert_to] = $response;
+//         }
+    
+//     }
+//         return $arrayofconversion; 
+// }
+
+        
+//         // echo "<pre>";
+//         // print_r(currency_conversion("Eff",2.0));
+//         // echo "</pre>";
+    
+//         try{
+//             return currency_conversion("eff");
+//             }
+//             catch(Exception $e){
+//             echo $e->getMessage();
+//             exit();
+//             }
+
+
+$curl = curl_init();       
+
+curl_setopt_array($curl, [
+	CURLOPT_URL => "https://currency-exchange.p.rapidapi.com/listquotes",
+	CURLOPT_RETURNTRANSFER => true,
+	CURLOPT_FOLLOWLOCATION => true,
+	CURLOPT_ENCODING => "",
+	CURLOPT_MAXREDIRS => 10,
+	CURLOPT_TIMEOUT => 30,
+	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+	CURLOPT_CUSTOMREQUEST => "GET",
+	CURLOPT_HTTPHEADER => [
+		"x-rapidapi-host: currency-exchange.p.rapidapi.com",
+		"x-rapidapi-key: 04f44a4054msh92583eb306794d9p1f7b99jsn27c76c1fd7d8"
+	],
+]);
+
+$response = curl_exec($curl);
+$err = curl_error($curl);
+
+curl_close($curl);
+
+if ($err) {
+	echo "cURL Error #:" . $err;
+} else {
+    $available_currencies=array();
+    foreach(explode('"',$response) as $str){
+        if(!str_contains($str,",")){
+            array_push($available_currencies,$str);
+    }  elseif(!str_contains($str,"[")){
+            array_push($available_currencies,$str);
+    } elseif(!str_contains($str,"]")){
+            array_push($available_currencies,$str);
+    }
+  }
+}
+
+
+echo"<pre>";
+	 print_r($available_currencies);
+echo"</pre>";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     ?>
 

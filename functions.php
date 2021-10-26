@@ -45,11 +45,15 @@ function create_tax_data(){ //can crate array of tax info. very reusalble when t
 
 
 
-function calculate_standard_tax($person, $tax_info, $currency=""){ //if currency is not set, is set to none, this will just print the float value out when called.
+function calculate_standard_tax($person, $tax_info, $currency=""){ //if currency is not set, is set to none, this will just print the default currency value out when called.
     $salary = (float) $person["salary"]; //this is used to deduct max salary of tax bands to work out each stage
     $salary_total = (float) $salary; //this is used when a persons tax band is identified, to work out their salary after tax
     $tax_band = $person["tax_band"]; //persons tax band
     $tax_deductable =0.00; //total of how much tax to deduct from salary_total
+
+    if(!$currency){
+       $currency=$person["currency"];
+    }
 
     if($tax_band == "tax_band_1"){ //all works around what the persons tax band was set to
         if($currency){ //checks if a currency was applied, if so it will try to run process_value with it
@@ -61,13 +65,16 @@ function calculate_standard_tax($person, $tax_info, $currency=""){ //if currency
             exit();
             }
         }else{
-            return $salary_total;//if no currency has been entered, it will just return a floating point value.
+            return $salary_total;//if no currency has been entered, it will just return the default value (Either GPB or USD).
         }
     }else{
-        if($tax_band=="tax_band_4" || $person["companycar"]=="y"){ //reduces person tax free allowance by 50% if tax band is 4, or has company car!
+        if($tax_band=="tax_band_4"){ //reduces person tax free allowance by 50% if tax band is 4, or has company car!
             $salary -= 5000;
-        }else{
-        $salary -= 10000;
+        }elseif($person["companycar"]=="y"){
+          //dont deduct anything  
+        }
+        else{
+            $salary -= 10000;
         }
     // this is a unqiue case as tax band 1 persons dont pay tax, as their taxband is below the first thresh hold. it is also noted that tax band 4 employees pay 50% less (5k), also no math is performed here apart from
     // reducing the person salary by the higher threshold ammount, to work out how much left is taxable.
@@ -152,6 +159,17 @@ function format_currency_GBP($value){
         throw new Exception("data supplied to '".__FUNCTION__."' was not numeric"); //throw exception stating supplied value is incorrect type also print function name
     }else{
         $formattedvalue = '£' . number_format( (float) $value, 2, '.', ',' ); //formats to pounds with two decimal places.
+        return $formattedvalue;
+    }   
+    
+}
+
+function format_currency_USD($value){
+    $formattedvalue = "";
+    if(!is_numeric($value)){ //checks to see if the input is not numeric
+        throw new Exception("data supplied to '".__FUNCTION__."' was not numeric"); //throw exception stating supplied value is incorrect type also print function name
+    }else{
+        $formattedvalue = '$' . number_format( (float) $value, 2, '.', ',' ); //formats to euro with two decimal places.
         return $formattedvalue;
     }   
     
