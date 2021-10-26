@@ -35,9 +35,9 @@ function create_tax_data(){ //can crate array of tax info. very reusalble when t
     $json = file_get_contents("./tax-tables.json");
     $taxdatapre = json_decode($json,true);
     foreach($taxdatapre as $tax){
-         $elementrename =  "tax_band_".$tax["id"];
-         $taxdata[$elementrename] = $tax;
-         $elementrename=""; 
+        $elementrename =  "tax_band_".$tax["id"];
+        $taxdata[$elementrename] = $tax;
+        $elementrename=""; 
     } //this creates an array from tax rate JSON, renaming the parent element to the tax band, and removing the name elemen
 
     return $taxdata;
@@ -45,14 +45,14 @@ function create_tax_data(){ //can crate array of tax info. very reusalble when t
 
 
 
-function calculate_standard_tax($person, $tax_info, $currency=""){ //if currency is not set, is set to none, this will just print the default currency value out when called.
+function calculate_standard_tax($person, $tax_info, $currency){ //if currency is not set, is set to the persons default, this will just print the default currency value out when called.
     $salary = (float) $person["salary"]; //this is used to deduct max salary of tax bands to work out each stage
     $salary_total = (float) $salary; //this is used when a persons tax band is identified, to work out their salary after tax
     $tax_band = $person["tax_band"]; //persons tax band
     $tax_deductable =0.00; //total of how much tax to deduct from salary_total
 
-    if(!$currency){
-       $currency=$person["currency"];
+    if(!$currency=$person["currency"]){
+        // exchange currency
     }
 
     if($tax_band == "tax_band_1"){ //all works around what the persons tax band was set to
@@ -68,9 +68,9 @@ function calculate_standard_tax($person, $tax_info, $currency=""){ //if currency
             return $salary_total;//if no currency has been entered, it will just return the default value (Either GPB or USD).
         }
     }else{
-        if($tax_band=="tax_band_4"){ //reduces person tax free allowance by 50% if tax band is 4, or has company car!
+        if($tax_band=="tax_band_4"){ //reduces person tax free allowance by 50% if tax band is 4
             $salary -= 5000;
-        }elseif($person["companycar"]=="y"){
+        }elseif($person["companycar"]=="y"){ //has company car means dont take anything of total to tax
           //dont deduct anything  
         }
         else{
@@ -82,7 +82,6 @@ function calculate_standard_tax($person, $tax_info, $currency=""){ //if currency
     if($tax_band=="tax_band_2"){ //these sections return to the call, identifies person tax band and calculates accordingly
         $tax_deductable += $salary*($tax_info["tax_band_2"]["rate"]/100); // if applicable, the persons salary should sit on this band, meaning it is a percentage (in this case 20%) of what is left
         $salary_total -= $tax_deductable; //removes this tax from total salary
-        if($currency){
             try{
             return process_value($salary_total,$currency);
             }
@@ -90,10 +89,6 @@ function calculate_standard_tax($person, $tax_info, $currency=""){ //if currency
             echo $e->getMessage();
             exit();
             }
-        }else{
-            return $salary_total;
-        }
-        
     }else{//else would mean that the person is not in that tax band, but they have to pay the maximum tax in this bracket (20% of 40k in this case)
         $salary -= $tax_info["tax_band_2"]["maxsalary"]; //takes away max band to work out what is left
         $tax_deductable += $tax_info["tax_band_2"]["maxsalary"]*($tax_info["tax_band_2"]["rate"]/100); //adds the tax in this band to use when required (when working out total taxable)
@@ -103,7 +98,6 @@ function calculate_standard_tax($person, $tax_info, $currency=""){ //if currency
     if($tax_band=="tax_band_3"){
         $tax_deductable += $salary*($tax_info["tax_band_3"]["rate"]/100);
         $salary_total -= $tax_deductable;
-        if($currency){
             try{
             return process_value($salary_total,$currency);
             }
@@ -111,9 +105,6 @@ function calculate_standard_tax($person, $tax_info, $currency=""){ //if currency
             echo $e->getMessage();
             exit();
             }
-        }else{
-            return $salary_total;
-        }
     }else{
         $salary -= $tax_info["tax_band_3"]["maxsalary"];
         $tax_deductable += $tax_info["tax_band_3"]["maxsalary"]*($tax_info["tax_band_3"]["rate"]/100);
@@ -129,12 +120,12 @@ function calculate_standard_tax($person, $tax_info, $currency=""){ //if currency
             echo $e->getMessage();
             exit();
             }
-        }else{
-            return $salary_total;
-        }
     //should be the end here //IF PERSON IS TAX BAND 4, £10K TAX FREE ALLOWANCE IS REDUCED TO £5K.
+       }
     }
 }
+
+
 
 
 function process_value($value,$currency){ //this will attempt to process a value, it will check what functions exist, and if it does call it. the returned ammount will be formatted as a specific currency.
@@ -153,6 +144,15 @@ function process_value($value,$currency){ //this will attempt to process a value
 }
 
 
+
+
+
+
+
+
+
+
+
 function format_currency_GBP($value){
     $formattedvalue = "";
     if(!is_numeric($value)){ //checks to see if the input is not numeric
@@ -169,8 +169,12 @@ function format_currency_USD($value){
     if(!is_numeric($value)){ //checks to see if the input is not numeric
         throw new Exception("data supplied to '".__FUNCTION__."' was not numeric"); //throw exception stating supplied value is incorrect type also print function name
     }else{
+
         $formattedvalue = '$' . number_format( (float) $value, 2, '.', ',' ); //formats to euro with two decimal places.
         return $formattedvalue;
+
+
+
     }   
     
 }
@@ -185,6 +189,21 @@ function format_currency_EUR($value){
     }   
     
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function check_currency_functions(){ //creates an array of available functions, in which have been created to format currency. will return what is available. uses the function below to return a formatted list to user
     $user_defined_funcs = get_defined_functions(false);
@@ -207,4 +226,92 @@ function available_functions($functions,$message=""){ //will just tell you what 
         }
         echo "</ul>";
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+function currency_conversion($currency_convert_from){ //creates an array of currency values from an API. will take any input that the API supports (USD, JPY, EUR etc) and return the conversion rates for the availble "format_currency_" functions.
+    $currency_convert_from = strtoupper($currency_convert_from);
+    $arrayofconversion = array();
+    $api_key = "04f44a4054msh92583eb306794d9p1f7b99jsn27c76c1fd7d8";
+    $curl = curl_init();
+
+    curl_setopt_array($curl, [
+        CURLOPT_URL => "https://currency-exchange.p.rapidapi.com/listquotes",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "GET",
+        CURLOPT_HTTPHEADER => [
+            "x-rapidapi-host: currency-exchange.p.rapidapi.com",
+            "x-rapidapi-key: ".$api_key
+        ],
+    ]);
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+    curl_close($curl);
+    if ($err) {
+       throw new Exception("cURL Error when checking available currencies on API #:" . $err);
+    } else {
+        $available_currencies=array();
+        foreach(explode('"',$response) as $str){
+            if(!str_contains($str,",")){
+                if(!str_contains($str,"[")){
+                    if(!str_contains($str,"]")){
+                        array_push($available_currencies,$str);
+                    } 
+                 }  
+             }
+         }
+            $check_if_exists = 0;
+            foreach($available_currencies as $currency){
+                if(strcmp($currency_convert_from, $currency)!==0){
+                    $check_if_exists += 1;  
+                }
+            }
+            if($check_if_exists == count($available_currencies)){
+                throw new Exception(available_functions($available_currencies,"Currency format is not available from API, availble currencies are:"));
+            }
+    }
+    foreach(check_currency_functions() as $function){
+    $currency_convert_to = strtoupper(substr($function,-3));   
+    $curl = curl_init();
+    curl_setopt_array($curl, [
+        CURLOPT_URL => "https://currency-exchange.p.rapidapi.com/exchange?from=".$currency_convert_from."&to=".$currency_convert_to,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "GET",
+        CURLOPT_HTTPHEADER => [
+            "x-rapidapi-host: currency-exchange.p.rapidapi.com",
+            "x-rapidapi-key: ".$api_key
+        ],
+    ]);
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+    curl_close($curl);    
+    if ($err) {
+        throw new exception("cURL Error when gathering currency exchange rates #:" . $err);
+    } else {
+        $arrayofconversion[$currency_convert_to] = $response;
+    }
+  }
+    return $arrayofconversion; 
+}   
+
 ?>
