@@ -29,7 +29,7 @@ if($_SESSION["usercreds"] == 1 or $_SESSION["usercreds"] == 2){
         exit; //need exit after each header call so page does not continue loading
     }else{     
         $_SESSION["userdetails"] = array("user"=>$user["username"], "permission" => $user["permission"]);
-        header("location: results.php"); //this will send the user to the main page, ideal outcome as both username and password were correct
+        header("location: mainpage.php"); //this will send the user to the main page, ideal outcome as both username and password were correct
         exit; //need exit after each header call so page does not continue loading
 }
 

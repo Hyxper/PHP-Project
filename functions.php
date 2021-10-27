@@ -1,5 +1,8 @@
 <?php
-function create_personel_data(){
+
+//JACK ADD ARRAY THAT RETURNS MONTHLY PAY/ GROSS PAY/ TAX DEDUCTED/ YEARLY PAY
+
+function create_personel_data($currency_to_work_in,$currency_rates){ // creates data for each person on list. Supplied with desired currency to exchange and base tax bands accordingly.
     $personeldatapre = array();
     $personeldata = array();
     $json = file_get_contents("./employees-final.json");
@@ -13,7 +16,11 @@ function create_personel_data(){
     $taxdata = create_tax_data(); //calls below function to create tax band info for employees
 
     foreach($personeldata as $key=>$person){
+        if($person["currency"]!==$currency_to_work_in){
+        $salarytocheck = exchange_currenncy($currency_rates,$person["salary"],$person["currency"]);
+        }else{
         $salarytocheck = $person["salary"];     
+        }
          if($salarytocheck <= $taxdata["tax_band_1"]["maxsalary"]){ // 10k
              $personeldata[$key]["tax_band"] = "tax_band_1";           
          }elseif($salarytocheck <= $taxdata["tax_band_2"]["maxsalary"]){//40k
@@ -45,28 +52,28 @@ function create_tax_data(){ //can crate array of tax info. very reusalble when t
 
 
 
-function calculate_standard_tax($person, $tax_info, $currency){ //if currency is not set, is set to the persons default, this will just print the default currency value out when called.
+function calculate_standard_tax($person, $tax_info, $currency, $currency_rates){ //currency_rates must be generated before, and must best what currency you want to work in. ($currency = GBP, $currency_rates must be GBP)
     $salary = (float) $person["salary"]; //this is used to deduct max salary of tax bands to work out each stage
     $salary_total = (float) $salary; //this is used when a persons tax band is identified, to work out their salary after tax
     $tax_band = $person["tax_band"]; //persons tax band
     $tax_deductable =0.00; //total of how much tax to deduct from salary_total
 
-    if(!$currency=$person["currency"]){
-        // exchange currency
+    if($currency!==$person["currency"]){
+       $salary = exchange_currenncy($currency_rates,$salary,$person["currency"]); //salary and salary total are converted to whatever currency (GBP etc) was supplied when calling function
+       $salary_total = $salary;
     }
 
     if($tax_band == "tax_band_1"){ //all works around what the persons tax band was set to
-        if($currency){ //checks if a currency was applied, if so it will try to run process_value with it
             try{
-            return process_value($salary_total,$currency);//process value is supplied with the total salary (after tax), and supplied currency if there was one
+                if($currency!==$person["currency"]){ //if currency was converted, convert back
+                    $salary_total=exchange_currenncy($currency_rates,$salary_total,$person["currency"],true); //true indicates to revert the calculation
+                }
+            return process_value($salary_total,$person["currency"]);//process value is supplied with the total salary (after tax), and supplied currency if there was one, this will format the salary based on users currency (Currently)
             }
             catch(Exception $e){
             echo $e->getMessage();//if the currency isnt supported, this will catch an exception and report to the user what is available.
             exit();
             }
-        }else{
-            return $salary_total;//if no currency has been entered, it will just return the default value (Either GPB or USD).
-        }
     }else{
         if($tax_band=="tax_band_4"){ //reduces person tax free allowance by 50% if tax band is 4
             $salary -= 5000;
@@ -83,9 +90,12 @@ function calculate_standard_tax($person, $tax_info, $currency){ //if currency is
         $tax_deductable += $salary*($tax_info["tax_band_2"]["rate"]/100); // if applicable, the persons salary should sit on this band, meaning it is a percentage (in this case 20%) of what is left
         $salary_total -= $tax_deductable; //removes this tax from total salary
             try{
-            return process_value($salary_total,$currency);
+                if($currency!==$person["currency"]){
+                    $salary_total=exchange_currenncy($currency_rates,$salary_total,$person["currency"],true);
+                }
+            return process_value($salary_total,$person["currency"]);
             }
-            catch(Exception $e){
+    catch(Exception $e){
             echo $e->getMessage();
             exit();
             }
@@ -99,7 +109,10 @@ function calculate_standard_tax($person, $tax_info, $currency){ //if currency is
         $tax_deductable += $salary*($tax_info["tax_band_3"]["rate"]/100);
         $salary_total -= $tax_deductable;
             try{
-            return process_value($salary_total,$currency);
+                if($currency!==$person["currency"]){
+                    $salary_total=exchange_currenncy($currency_rates,$salary_total,$person["currency"],true);
+                }
+            return process_value($salary_total,$person["currency"]);
             }
             catch(Exception $e){
             echo $e->getMessage();
@@ -114,7 +127,10 @@ function calculate_standard_tax($person, $tax_info, $currency){ //if currency is
         $salary_total -= $tax_deductable;
         if($currency){
             try{
-            return process_value($salary_total,$currency);
+                if($currency!==$person["currency"]){
+                    $salary_total=exchange_currenncy($currency_rates,$salary_total,$person["currency"],true);
+                }
+            return process_value($salary_total,$person["currency"]);
             }
             catch(Exception $e){
             echo $e->getMessage();
@@ -144,12 +160,24 @@ function process_value($value,$currency){ //this will attempt to process a value
 }
 
 
-
-
-
-
-
-
+function exchange_currenncy($rates,$amount,$exchange_currency,$revert = false){ //this takes a generated array of exchange rates (see currency conversion), ammount to exchange, what to exchange to/from
+    $amount = (float) $amount;
+    $check_if_exists = 0;
+    foreach($rates as $currency=>$value){
+        if(strcmp($currency,$exchange_currency)!==0){
+            $check_if_exists += 1;  
+        }
+    }
+    if($check_if_exists == count($rates)){
+        throw new Exception(available_functions($rates,"'".$exchange_currency."' is not supported for coversion. Supported currencies are:")); //will complain if supplied currency is not supported
+    }else{      
+        if($revert){
+        return $amount*$rates[$exchange_currency]; //convert from
+        }else{        
+         return $amount/$rates[$exchange_currency]; //convert to
+        }
+    }
+}
 
 
 
@@ -170,7 +198,7 @@ function format_currency_USD($value){
         throw new Exception("data supplied to '".__FUNCTION__."' was not numeric"); //throw exception stating supplied value is incorrect type also print function name
     }else{
 
-        $formattedvalue = '$' . number_format( (float) $value, 2, '.', ',' ); //formats to euro with two decimal places.
+        $formattedvalue = '$' . number_format( (float) $value, 2, '.', ',' ); //formats to dollars with two decimal places.
         return $formattedvalue;
 
 
@@ -192,18 +220,80 @@ function format_currency_EUR($value){
 
 
 
+function currency_conversion($currency_convert_from){ //creates an array of currency values from an API. will take any input that the API supports (USD, JPY, EUR etc) and return the conversion rates for the availble "format_currency_" functions.
+    $currency_convert_from = strtoupper($currency_convert_from); //makes it so can be entered lower case.
+    $arrayofconversion = array(); //array that will contain all of the conversion rates
+    $api_key = "04f44a4054msh92583eb306794d9p1f7b99jsn27c76c1fd7d8"; //key needed to interface with API
 
-
-
-
-
-
-
-
-
-
-
-
+    $curl = curl_init(); //start process
+    curl_setopt_array($curl, [
+        CURLOPT_URL => "https://currency-exchange.p.rapidapi.com/listquotes",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "GET",
+        CURLOPT_HTTPHEADER => [
+            "x-rapidapi-host: currency-exchange.p.rapidapi.com",
+            "x-rapidapi-key: ".$api_key
+        ],
+    ]);
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+    curl_close($curl);
+    if ($err) {
+       throw new Exception("cURL Error when checking available currencies on API #:" . $err); //reports if there was an error getting data
+    } else {
+        $available_currencies=array();
+        foreach(explode('"',$response) as $str){ //filter out response from API, contained commas and brackets
+            if(!str_contains($str,",")){
+                if(!str_contains($str,"[")){
+                    if(!str_contains($str,"]")){
+                        array_push($available_currencies,$str); //this will only push elements from the string that are valid (Currencies)
+                    } 
+                 }  
+             }
+         }
+            $check_if_exists = 0;
+            foreach($available_currencies as $currency){ //this section will go through each element and check for a match, if the counter is not equal to the array length, means the input from user was invalid
+                if(strcmp($currency_convert_from, $currency)!==0){
+                    $check_if_exists += 1;  
+                }
+            }
+            if($check_if_exists == count($available_currencies)){
+                throw new Exception(available_functions($available_currencies,"Currency format is not available from API, availble currencies are:"));
+            }
+    }
+    foreach(check_currency_functions() as $function){ //this ensures that conversion rates are only added that have a existing formatting function. More functions means more support.
+    $currency_convert_to = strtoupper(substr($function,-3));   //will always be denoted by last 3 letters (GBP, EUR, USD, JPY)
+    $curl = curl_init();
+    curl_setopt_array($curl, [
+        CURLOPT_URL => "https://currency-exchange.p.rapidapi.com/exchange?from=".$currency_convert_from."&to=".$currency_convert_to, //concat what has been entered, with what is available.
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "GET",
+        CURLOPT_HTTPHEADER => [
+            "x-rapidapi-host: currency-exchange.p.rapidapi.com",
+            "x-rapidapi-key: ".$api_key
+        ],
+    ]);
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+    curl_close($curl);    
+    if ($err) {
+        throw new exception("cURL Error when gathering currency exchange rates #:" . $err);
+    } else {
+        $arrayofconversion[$currency_convert_to] = $response; //appends to array.
+    }
+  }
+    return $arrayofconversion; 
+}   
 
 function check_currency_functions(){ //creates an array of available functions, in which have been created to format currency. will return what is available. uses the function below to return a formatted list to user
     $user_defined_funcs = get_defined_functions(false);
@@ -226,92 +316,5 @@ function available_functions($functions,$message=""){ //will just tell you what 
         }
         echo "</ul>";
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-function currency_conversion($currency_convert_from){ //creates an array of currency values from an API. will take any input that the API supports (USD, JPY, EUR etc) and return the conversion rates for the availble "format_currency_" functions.
-    $currency_convert_from = strtoupper($currency_convert_from);
-    $arrayofconversion = array();
-    $api_key = "04f44a4054msh92583eb306794d9p1f7b99jsn27c76c1fd7d8";
-    $curl = curl_init();
-
-    curl_setopt_array($curl, [
-        CURLOPT_URL => "https://currency-exchange.p.rapidapi.com/listquotes",
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 30,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => [
-            "x-rapidapi-host: currency-exchange.p.rapidapi.com",
-            "x-rapidapi-key: ".$api_key
-        ],
-    ]);
-    $response = curl_exec($curl);
-    $err = curl_error($curl);
-    curl_close($curl);
-    if ($err) {
-       throw new Exception("cURL Error when checking available currencies on API #:" . $err);
-    } else {
-        $available_currencies=array();
-        foreach(explode('"',$response) as $str){
-            if(!str_contains($str,",")){
-                if(!str_contains($str,"[")){
-                    if(!str_contains($str,"]")){
-                        array_push($available_currencies,$str);
-                    } 
-                 }  
-             }
-         }
-            $check_if_exists = 0;
-            foreach($available_currencies as $currency){
-                if(strcmp($currency_convert_from, $currency)!==0){
-                    $check_if_exists += 1;  
-                }
-            }
-            if($check_if_exists == count($available_currencies)){
-                throw new Exception(available_functions($available_currencies,"Currency format is not available from API, availble currencies are:"));
-            }
-    }
-    foreach(check_currency_functions() as $function){
-    $currency_convert_to = strtoupper(substr($function,-3));   
-    $curl = curl_init();
-    curl_setopt_array($curl, [
-        CURLOPT_URL => "https://currency-exchange.p.rapidapi.com/exchange?from=".$currency_convert_from."&to=".$currency_convert_to,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 30,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => [
-            "x-rapidapi-host: currency-exchange.p.rapidapi.com",
-            "x-rapidapi-key: ".$api_key
-        ],
-    ]);
-    $response = curl_exec($curl);
-    $err = curl_error($curl);
-    curl_close($curl);    
-    if ($err) {
-        throw new exception("cURL Error when gathering currency exchange rates #:" . $err);
-    } else {
-        $arrayofconversion[$currency_convert_to] = $response;
-    }
-  }
-    return $arrayofconversion; 
-}   
 
 ?>

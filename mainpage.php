@@ -13,12 +13,13 @@
     <?php
         require __DIR__ . '/functions.php';
 
-        $personel = create_personel_data();
-        $tax_information = create_tax_data();
         $GBP_rates = currency_conversion("GBP");
+        $EUR_rates = currency_conversion("EUR");
+        $personel = create_personel_data("GBP",$GBP_rates);
+        $tax_information = create_tax_data();
 
         print_r($GBP_rates);
-
+        echo "<br>";
 
 
         // try{
@@ -29,15 +30,19 @@
         //     exit();
         //     }
 
-        
+        foreach($personel as $person){
+            echo calculate_standard_tax($person, $tax_information, "GBP", $GBP_rates);
+            echo $person["firstname"]." ".$person["lastname"]." <br>";
+            // echo $person["currency"]."<br>";
+            // echo calculate_standard_tax($person, $tax_information, "EUR", $EUR_rates)."<br>";
+        }
 
-
-
-
-
-
-
-
+        // print_r($GBP_rates);
+        echo "<br>";
+        // echo format_currency_USD(exchange_currenncy($GBP_rates,31999.022570424,"USD",true))."<br>";
+        // echo "<br>";
+        // echo calculate_standard_tax($personel["8734_Laura_Waterman"], $tax_information, "GBP", $GBP_rates)."<br>";
+        // echo 31999.022570424*1.375042;       
 
 
 
