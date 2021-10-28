@@ -2,6 +2,12 @@
 
 //JACK ADD ARRAY THAT RETURNS MONTHLY PAY/ GROSS PAY/ TAX DEDUCTED/ YEARLY PAY
 
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------CREATE DATA SETS----------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 function create_personel_data($currency_to_work_in,$currency_rates){ // creates data for each person on list. Supplied with desired currency to exchange and base tax bands accordingly.
     $personeldatapre = array();
     $personeldata = array();
@@ -50,25 +56,43 @@ function create_tax_data(){ //can crate array of tax info. very reusalble when t
     return $taxdata;
 }
 
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------CACLULATE TAX-------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 function calculate_standard_tax($person, $tax_info, $currency, $currency_rates){ //currency_rates must be generated before, and must best what currency you want to work in. ($currency = GBP, $currency_rates must be GBP)
     $salary = (float) $person["salary"]; //this is used to deduct max salary of tax bands to work out each stage
-    $salary_total = (float) $salary; //this is used when a persons tax band is identified, to work out their salary after tax
+    $net_salary = (float) $salary; //this is used when a persons tax band is identified, to work out their salary after tax
     $tax_band = $person["tax_band"]; //persons tax band
-    $tax_deductable =0.00; //total of how much tax to deduct from salary_total
+    $current_working_currency = $person["currency"];
+    $tax_deductable =0.00; //total of how much tax to deduct from net_salary
+    $calculated_values = array();
 
-    if($currency!==$person["currency"]){
-       $salary = exchange_currenncy($currency_rates,$salary,$person["currency"]); //salary and salary total are converted to whatever currency (GBP etc) was supplied when calling function
-       $salary_total = $salary;
+    if($currency!==$current_working_currency){
+       $salary = exchange_currenncy($currency_rates,$salary,$current_working_currency); //salary and salary total are converted to whatever currency (GBP etc) was supplied when calling function
+       $net_salary = $salary;
     }
 
     if($tax_band == "tax_band_1"){ //all works around what the persons tax band was set to
             try{
-                if($currency!==$person["currency"]){ //if currency was converted, convert back
-                    $salary_total=exchange_currenncy($currency_rates,$salary_total,$person["currency"],true); //true indicates to revert the calculation
+                if($currency!==$current_working_currency){ //if currency was converted, convert back  
+                    $tax_deductable=exchange_currenncy($currency_rates,$tax_deductable,$current_working_currency,true);
+                    $net_salary=exchange_currenncy($currency_rates,$net_salary,$current_working_currency,true); //true indicates to revert the calculation
                 }
-            return process_value($salary_total,$person["currency"]);//process value is supplied with the total salary (after tax), and supplied currency if there was one, this will format the salary based on users currency (Currently)
+                 $calculated_values["salary_year"] = $person["salary"];
+                 $calculated_values["tax_year"] = $tax_deductable;
+                 $calculated_values["net_salary_year"] = $net_salary;
+                 $calculated_values["salary_month"] = $person["salary"]/12;
+                 $calculated_values["tax_month"] = $tax_deductable/12;
+                 $calculated_values["net_salary_month"] = $net_salary/12;
+                 foreach($calculated_values as $key=>$calc_value){
+                  $calculated_values[$key]=process_value($calc_value,$current_working_currency);
+                 }
+                 return $calculated_values;
+            //process value is supplied with the total salary (after tax), and supplied currency if there was one, this will format the salary based on users currency (Currently)
             }
             catch(Exception $e){
             echo $e->getMessage();//if the currency isnt supported, this will catch an exception and report to the user what is available.
@@ -84,37 +108,59 @@ function calculate_standard_tax($person, $tax_info, $currency, $currency_rates){
             $salary -= 10000;
         }
     // this is a unqiue case as tax band 1 persons dont pay tax, as their taxband is below the first thresh hold. it is also noted that tax band 4 employees pay 50% less (5k), also no math is performed here apart from
-    // reducing the person salary by the higher threshold ammount, to work out how much left is taxable.
+    // reducing the person salary by the higher threshold amount, to work out how much left is taxable.
     }
     if($tax_band=="tax_band_2"){ //these sections return to the call, identifies person tax band and calculates accordingly
         $tax_deductable += $salary*($tax_info["tax_band_2"]["rate"]/100); // if applicable, the persons salary should sit on this band, meaning it is a percentage (in this case 20%) of what is left
-        $salary_total -= $tax_deductable; //removes this tax from total salary
-            try{
-                if($currency!==$person["currency"]){
-                    $salary_total=exchange_currenncy($currency_rates,$salary_total,$person["currency"],true);
-                }
-            return process_value($salary_total,$person["currency"]);
+        $net_salary -= $tax_deductable; //removes this tax from total salary
+        try{
+            if($currency!==$current_working_currency){ //if currency was converted, convert back  
+                $tax_deductable=exchange_currenncy($currency_rates,$tax_deductable,$current_working_currency,true);
+                $net_salary=exchange_currenncy($currency_rates,$net_salary,$current_working_currency,true); //true indicates to revert the calculation
             }
-    catch(Exception $e){
+             $calculated_values["salary_year"] = $person["salary"];
+             $calculated_values["tax_year"] = $tax_deductable;
+             $calculated_values["net_salary_year"] = $net_salary;
+             $calculated_values["salary_month"] = $person["salary"]/12;
+             $calculated_values["tax_month"] = $tax_deductable/12;
+             $calculated_values["net_salary_month"] = $net_salary/12;
+             foreach($calculated_values as $key=>$calc_value){
+                $calculated_values[$key]=process_value($calc_value,$current_working_currency);
+             }
+             return $calculated_values;
+        //process value is supplied with the total salary (after tax), and supplied currency if there was one, this will format the salary based on users currency (Currently)
+        }
+        catch(Exception $e){
             echo $e->getMessage();
             exit();
             }
     }else{//else would mean that the person is not in that tax band, but they have to pay the maximum tax in this bracket (20% of 40k in this case)
         $salary -= $tax_info["tax_band_2"]["maxsalary"]; //takes away max band to work out what is left
         $tax_deductable += $tax_info["tax_band_2"]["maxsalary"]*($tax_info["tax_band_2"]["rate"]/100); //adds the tax in this band to use when required (when working out total taxable)
-    //the other sections are structed the same way. The person is either in a tax band, and works out the remainder, OR the taxable ammount is deducted from the counter, and the tax for that band is worked out, then is rolled
+    //the other sections are structed the same way. The person is either in a tax band, and works out the remainder, OR the taxable amount is deducted from the counter, and the tax for that band is worked out, then is rolled
     //onto the next band in order to keep track of total tax to deduct.
     }
     if($tax_band=="tax_band_3"){
         $tax_deductable += $salary*($tax_info["tax_band_3"]["rate"]/100);
-        $salary_total -= $tax_deductable;
-            try{
-                if($currency!==$person["currency"]){
-                    $salary_total=exchange_currenncy($currency_rates,$salary_total,$person["currency"],true);
-                }
-            return process_value($salary_total,$person["currency"]);
+        $net_salary -= $tax_deductable;
+        try{
+            if($currency!==$current_working_currency){ //if currency was converted, convert back  
+                $tax_deductable=exchange_currenncy($currency_rates,$tax_deductable,$current_working_currency,true);
+                $net_salary=exchange_currenncy($currency_rates,$net_salary,$current_working_currency,true); //true indicates to revert the calculation
             }
-            catch(Exception $e){
+             $calculated_values["salary_year"] = $person["salary"];
+             $calculated_values["tax_year"] = $tax_deductable;
+             $calculated_values["net_salary_year"] = $net_salary;
+             $calculated_values["salary_month"] = $person["salary"]/12;
+             $calculated_values["tax_month"] = $tax_deductable/12;
+             $calculated_values["net_salary_month"] = $net_salary/12;
+             foreach($calculated_values as $key=>$calc_value){
+              $calculated_values[$key]=process_value($calc_value,$current_working_currency);
+             }
+             return $calculated_values;
+        //process value is supplied with the total salary (after tax), and supplied currency if there was one, this will format the salary based on users currency (Currently)
+        }
+        catch(Exception $e){
             echo $e->getMessage();
             exit();
             }
@@ -124,27 +170,41 @@ function calculate_standard_tax($person, $tax_info, $currency, $currency_rates){
     }
     if($tax_band=="tax_band_4"){
         $tax_deductable += $salary*($tax_info["tax_band_4"]["rate"]/100);
-        $salary_total -= $tax_deductable;
-        if($currency){
+        $net_salary -= $tax_deductable;
+       
             try{
-                if($currency!==$person["currency"]){
-                    $salary_total=exchange_currenncy($currency_rates,$salary_total,$person["currency"],true);
+                if($currency!==$current_working_currency){ //if currency was converted, convert back  
+                    $tax_deductable=exchange_currenncy($currency_rates,$tax_deductable,$current_working_currency,true);
+                    $net_salary=exchange_currenncy($currency_rates,$net_salary,$current_working_currency,true); //true indicates to revert the calculation
                 }
-            return process_value($salary_total,$person["currency"]);
+                 $calculated_values["salary_year"] = $person["salary"];
+                 $calculated_values["tax_year"] = $tax_deductable;
+                 $calculated_values["net_salary_year"] = $net_salary;
+                 $calculated_values["salary_month"] = $person["salary"]/12;
+                 $calculated_values["tax_month"] = $tax_deductable/12;
+                 $calculated_values["net_salary_month"] = $net_salary/12;
+                 foreach($calculated_values as $key=>$calc_value){
+                  $calculated_values[$key]=process_value($calc_value,$current_working_currency);
+                 }
+                 return $calculated_values;
+            //process value is supplied with the total salary (after tax), and supplied currency if there was one, this will format the salary based on users currency (Currently)
             }
             catch(Exception $e){
-            echo $e->getMessage();
-            exit();
-            }
+                echo $e->getMessage();
+                exit();
+                }
     //should be the end here //IF PERSON IS TAX BAND 4, £10K TAX FREE ALLOWANCE IS REDUCED TO £5K.
-       }
     }
 }
 
 
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------FORMAT CURRENCY-------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-function process_value($value,$currency){ //this will attempt to process a value, it will check what functions exist, and if it does call it. the returned ammount will be formatted as a specific currency.
+function process_value($value,$currency){ //this will attempt to process a value, it will check what functions exist, and if it does call it. the returned amount will be formatted as a specific currency.
     $format_currency_func = "format_currency_".$currency;
     if(!function_exists($format_currency_func)){ //checks if function exists with passed currency (GBP etc)
         throw new Exception(available_functions(check_currency_functions(),"'".$currency."' is not supported. Supported functions are:")); //will complain if supplied currency is not supported
@@ -159,8 +219,42 @@ function process_value($value,$currency){ //this will attempt to process a value
     }    
 }
 
+function format_currency_GBP($value){
+    $formattedvalue = "";
+    if(!is_numeric($value)){ //checks to see if the input is not numeric
+        throw new Exception("data supplied to '".__FUNCTION__."' was not numeric"); //throw exception stating supplied value is incorrect type also print function name
+    }else{
+        $formattedvalue = '£' . number_format( (float) $value, 2, '.', ',' ); //formats to pounds with two decimal places.
+        return $formattedvalue;
+    }      
+}
 
-function exchange_currenncy($rates,$amount,$exchange_currency,$revert = false){ //this takes a generated array of exchange rates (see currency conversion), ammount to exchange, what to exchange to/from
+function format_currency_USD($value){
+    $formattedvalue = "";
+    if(!is_numeric($value)){ //checks to see if the input is not numeric
+        throw new Exception("data supplied to '".__FUNCTION__."' was not numeric"); //throw exception stating supplied value is incorrect type also print function name
+    }else{
+
+        $formattedvalue = '$' . number_format( (float) $value, 2, '.', ',' ); //formats to dollars with two decimal places.
+        return $formattedvalue;
+    }     
+}
+
+function format_currency_EUR($value){
+    $formattedvalue = "";
+    if(!is_numeric($value)){ //checks to see if the input is not numeric
+        throw new Exception("data supplied to '".__FUNCTION__."' was not numeric"); //throw exception stating supplied value is incorrect type also print function name
+    }else{
+        $formattedvalue = '€' . number_format( (float) $value, 2, '.', ',' ); //formats to euro with two decimal places.
+        return $formattedvalue;
+    }      
+}
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------EXCHANGE CURRENCY---------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+function exchange_currenncy($rates,$amount,$exchange_currency,$revert = false){ //this takes a generated array of exchange rates (see currency conversion), amount to exchange, what to exchange to/from
     $amount = (float) $amount;
     $check_if_exists = 0;
     foreach($rates as $currency=>$value){
@@ -178,48 +272,11 @@ function exchange_currenncy($rates,$amount,$exchange_currency,$revert = false){ 
         }
     }
 }
-
-
-
-function format_currency_GBP($value){
-    $formattedvalue = "";
-    if(!is_numeric($value)){ //checks to see if the input is not numeric
-        throw new Exception("data supplied to '".__FUNCTION__."' was not numeric"); //throw exception stating supplied value is incorrect type also print function name
-    }else{
-        $formattedvalue = '£' . number_format( (float) $value, 2, '.', ',' ); //formats to pounds with two decimal places.
-        return $formattedvalue;
-    }   
-    
-}
-
-function format_currency_USD($value){
-    $formattedvalue = "";
-    if(!is_numeric($value)){ //checks to see if the input is not numeric
-        throw new Exception("data supplied to '".__FUNCTION__."' was not numeric"); //throw exception stating supplied value is incorrect type also print function name
-    }else{
-
-        $formattedvalue = '$' . number_format( (float) $value, 2, '.', ',' ); //formats to dollars with two decimal places.
-        return $formattedvalue;
-
-
-
-    }   
-    
-}
-
-function format_currency_EUR($value){
-    $formattedvalue = "";
-    if(!is_numeric($value)){ //checks to see if the input is not numeric
-        throw new Exception("data supplied to '".__FUNCTION__."' was not numeric"); //throw exception stating supplied value is incorrect type also print function name
-    }else{
-        $formattedvalue = '€' . number_format( (float) $value, 2, '.', ',' ); //formats to euro with two decimal places.
-        return $formattedvalue;
-    }   
-    
-}
-
-
-
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------API FUNCTIONS-------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 function currency_conversion($currency_convert_from){ //creates an array of currency values from an API. will take any input that the API supports (USD, JPY, EUR etc) and return the conversion rates for the availble "format_currency_" functions.
     $currency_convert_from = strtoupper($currency_convert_from); //makes it so can be entered lower case.
     $arrayofconversion = array(); //array that will contain all of the conversion rates
@@ -294,6 +351,11 @@ function currency_conversion($currency_convert_from){ //creates an array of curr
   }
     return $arrayofconversion; 
 }   
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------AUXILLARY FUNCTIONS-------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 function check_currency_functions(){ //creates an array of available functions, in which have been created to format currency. will return what is available. uses the function below to return a formatted list to user
     $user_defined_funcs = get_defined_functions(false);
