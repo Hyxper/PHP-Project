@@ -10,38 +10,21 @@
 </head>
 <body>
 
-    <?php
-        require __DIR__ . '/functions.php';
+    
+      
 
-        $GBP_rates = currency_conversion("GBP");
-        $EUR_rates = currency_conversion("EUR");
-        $personel = create_personel_data("GBP",$GBP_rates);
-        $tax_information = create_tax_data();
-
-        // print_r($GBP_rates);
-        // echo "<br>";
-
-
-        // try{
-        //     print_r(currency_conversion("eur"));
-        //     }
-        //     catch(Exception $e){
-        //     echo $e->getMessage();
-        //     exit();
-        //     }
-
-        echo 
-        "
+       
         <nav class='navbar navbar-light bg-warning justify-content-center h2 mb-0'>
         <span class='navbar-brand mb-0'>Jack's PHP Project</span>
         </nav>
         
         
         
-        <table class='table table-bordered table-dark table-hover table-striped'>
+        <table class='table table-bordered table-light table-hover table-striped'>
             <thead class='text-center'>
             <tr>
                 <th scope='col'>ID</th>
+                <th scope='col'>Photo</th>
                 <th scope='col'>Surname</th>
                 <th scope='col'>First name</th>
                 <th scope='col'>Job title</th>
@@ -54,34 +37,41 @@
                 <th scope='col'>Net pay per month</th>
             </tr>
             </thead>
-            <tbody>";
+            <tbody>
+        <?php
+
+        require __DIR__ . '/functions.php';
+        
+        $GBP_rates = currency_conversion("GBP");
+        $personel = create_personel_data("GBP",$GBP_rates);
+        $tax_information = create_tax_data();
+
         foreach($personel as $person){
             $returned_values=calculate_standard_tax($person, $tax_information, "GBP", $GBP_rates);
+            $ID_name = $person["id"]."_".$person["firstname"]."_".$person["lastname"];       
        echo
        "
             <tr>
-                <th scope='row'>".$person["id"]."</th>
-                <td>".$person["lastname"]."</td>
-                <td>".$person["firstname"]."</td>
-                <td>".$person["jobtitle"]."</td>
-                <td>".$person["department"]."</td>
-                <td>".$returned_values["salary_year"]."</td>
-                <td>".$returned_values["tax_year"]."</td>
-                <td>".$returned_values["net_salary_year"]."</td>
-                <td>".$returned_values["salary_month"]."</td>
-                <td>".$returned_values["tax_month"]."</td>
-                <td>".$returned_values["net_salary_month"]."</td>
+                <th scope='row' id='".$ID_name."_ID'>".$person["id"]."</th>
+                <td id='".$ID_name."_photo' class='text-center'> <a href='https://placeholder.com'><img src='https://via.placeholder.com/100'></td>
+                <td id='".$ID_name."_lastname'>".$person["lastname"]."</td>
+                <td id='".$ID_name."_firstname'>".$person["firstname"]."</td>
+                <td id='".$ID_name."_jobtitle'>".$person["jobtitle"]."</td>
+                <td id='".$ID_name."_department'>".$person["department"]."</td>
+                <td id='".$ID_name."_salary_per_year'>".$returned_values["salary_year"]."</td>
+                <td id='".$ID_name."_tax_per_year' class='text-danger'>".$returned_values["tax_year"]."</td>
+                <td id='".$ID_name."_net_salary_per_year'class='text-success'>".$returned_values["net_salary_year"]."</td>
+                <td id='".$ID_name."_salary_per_month'>".$returned_values["salary_month"]."</td>
+                <td id='".$ID_name."_tax_per_month'class='text-danger'>".$returned_values["tax_month"]."</td>
+                <td id='".$ID_name."_salary_per_month' class='text-success'>".$returned_values["net_salary_month"]."</td>
             </tr>";
         }
-        echo"</tbody>   
-         </table"
+        ?>
 
-        // print_r($GBP_rates);
-    
-        // echo var_dump(format_currency_USD(exchange_currenncy($GBP_rates,31999.022570424,"USD",true)))."<br>";
-        // echo "<br>";
-        // echo calculate_standard_tax($personel["8734_Laura_Waterman"], $tax_information, "GBP", $GBP_rates)."<br>";
-        // echo 31999.022570424*1.375042;       
+            </tbody>   
+        </table>
+        
+  
 
 
 
@@ -102,7 +92,7 @@
 
 
 
-    ?>
+ 
 
 </body>
 </html>
