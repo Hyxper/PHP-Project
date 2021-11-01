@@ -20,7 +20,7 @@
         
         
         
-        <table class='table table-bordered table-light table-hover table-striped'>
+        <table class='table table-bordered table-light table-hover table-striped text-center'>
             <thead class='text-center'>
             <tr>
                 <th scope='col'>ID</th>
@@ -35,20 +35,24 @@
                 <th scope='col'>Salary per month</th>
                 <th scope='col'>Tax per month</th>
                 <th scope='col'>Net pay per month</th>
+                <th scope='col'>Records</th>
             </tr>
             </thead>
             <tbody>
         <?php
 
         require __DIR__ . '/functions.php';
-        
+
+        session_start();
         $GBP_rates = currency_conversion("GBP");
         $personel = create_personel_data("GBP",$GBP_rates);
         $tax_information = create_tax_data();
 
         foreach($personel as $person){
             $returned_values=calculate_standard_tax($person, $tax_information, "GBP", $GBP_rates);
-            $ID_name = $person["id"]."_".$person["firstname"]."_".$person["lastname"];       
+            $ID_name = $person["id"]."_".$person["firstname"]."_".$person["lastname"];
+            $_SESSION[$ID_name] = $person; //$returned_values;
+            $_SESSION[$ID_name]["calculated_salary_and_tax_info"]=$returned_values;
        echo
        "
             <tr>
@@ -64,6 +68,7 @@
                 <td id='".$ID_name."_salary_per_month'>".$returned_values["salary_month"]."</td>
                 <td id='".$ID_name."_tax_per_month'class='text-danger'>".$returned_values["tax_month"]."</td>
                 <td id='".$ID_name."_salary_per_month' class='text-success'>".$returned_values["net_salary_month"]."</td>
+                <td id='".$ID_name."_Records' class='text-success'><a href='person.php?person=".$ID_name."'><ul>View Record</ul></a></td>
             </tr>";
         }
         ?>
