@@ -20,7 +20,7 @@ function create_personel_data($currency_to_work_in,$currency_rates){ // creates 
     } //this adds the ID, firstname and last name to the parent array element, rather than normal.
  
     $taxdata = create_tax_data(); //calls below function to create tax band info for employees
-
+    
     foreach($personeldata as $key=>$person){
         if($person["currency"]!==$currency_to_work_in){
         $salarytocheck = exchange_currenncy($currency_rates,$person["salary"],$person["currency"]);
