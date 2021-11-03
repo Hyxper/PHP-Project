@@ -11,6 +11,7 @@
 function create_personel_data($currency_to_work_in,$currency_rates){ // creates data for each person on list. Supplied with desired currency to exchange and base tax bands accordingly.
     $personeldatapre = array();
     $personeldata = array();
+
     $json = file_get_contents("./employees-final.json");
     $personeldatapre = json_decode($json,true);
     foreach($personeldatapre as $person){
@@ -22,20 +23,21 @@ function create_personel_data($currency_to_work_in,$currency_rates){ // creates 
     $taxdata = create_tax_data(); //calls below function to create tax band info for employees
     
     foreach($personeldata as $key=>$person){
+
         if($person["currency"]!==$currency_to_work_in){
         $salarytocheck = exchange_currenncy($currency_rates,$person["salary"],$person["currency"]);
         }else{
         $salarytocheck = $person["salary"];     
         }
-         if($salarytocheck <= $taxdata["tax_band_1"]["maxsalary"]){ // 10k
-             $personeldata[$key]["tax_band"] = "tax_band_1";           
-         }elseif($salarytocheck <= $taxdata["tax_band_2"]["maxsalary"]){//40k
-             $personeldata[$key]["tax_band"] = "tax_band_2";            
-         }elseif($salarytocheck <= $taxdata["tax_band_3"]["maxsalary"]){//150k
-             $personeldata[$key]["tax_band"] = "tax_band_3";          
-         }elseif($salarytocheck > $taxdata["tax_band_4"]["minsalary"]){//150k+
-             $personeldata[$key]["tax_band"] = "tax_band_4";        
-         }
+
+        foreach($taxdata as $taxband => $taxinfo){
+            if($salarytocheck >= $taxinfo["minsalary"]){
+                if($salarytocheck <= $taxinfo["maxsalary"]){
+                    $personeldata[$key]["tax_band"] = $taxband;
+                }
+            }
+        }
+
     }
     //appends tax band to each employee, for tax calculation function.
     return $personeldata;
@@ -305,14 +307,10 @@ function currency_conversion($currency_convert_from){ //creates an array of curr
     } else {
         $available_currencies=array();
         foreach(explode('"',$response) as $str){ //filter out response from API, contained commas and brackets
-            if(!str_contains($str,",")){
-                if(!str_contains($str,"[")){
-                    if(!str_contains($str,"]")){
+            if(preg_match("/[\[,\]]/",$str) == 0){ //filters string with regeular expression
                         array_push($available_currencies,$str); //this will only push elements from the string that are valid (Currencies)
-                    } 
-                 }  
-             }
-         }
+            }
+        }
             $check_if_exists = 0;
             foreach($available_currencies as $currency){ //this section will go through each element and check for a match, if the counter is not equal to the array length, means the input from user was invalid
                 if(strcmp($currency_convert_from, $currency)!==0){
@@ -362,13 +360,15 @@ function check_currency_functions(){ //creates an array of available functions, 
     $user_defined_funcs = $user_defined_funcs["user"];
     $currency_functions = array();
     foreach($user_defined_funcs as $function){
-        if(str_contains($function,"format_currency")){
-        array_push($currency_functions, $function);
+        if(preg_match("/format_currency/",$function)){
+            array_push($currency_functions, $function);
         }
     }
     return $currency_functions;
 }
 
+
+// 
 
 function available_functions($functions,$message=""){ //will just tell you what functions are available based on what is passed in. formatted as a list. can supply optional message.
         echo $message."<br>";
