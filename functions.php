@@ -74,6 +74,8 @@ function calculate_standard_tax($person, $currency){ //currency_rates must be ge
     $calculated_values = array();
     $tax_information = $GLOBALS["tax_data"];
 
+    echo "<br>start<br>";
+
     if($currency!==$current_working_currency){
         try{
         $salary = exchange_currenncy($salary,$current_working_currency); //salary and salary total are converted to whatever currency (GBP etc) was supplied when calling function
@@ -82,18 +84,33 @@ function calculate_standard_tax($person, $currency){ //currency_rates must be ge
             echo $e->getMessage();//if the currency isnt supported, this will catch an exception and report to the user what is available.
             exit();
         }
+        echo "process currency conversion<br>";
+    }
+        
+        
 
-        foreach($tax_information as $tax_band)
+        foreach($tax_information as $tax_band=>$tax_data){
+
+            echo "working out ".$tax_band."<br>";
+
             if($person_tax_band == $tax_band){
+
+                echo "person is ".$tax_band."<br>";
+
                 if($tax_band !== "tax_band_1"){
-                    $tax_deductable += $salary*($tax_band["rate"]/100); // if applicable, the persons salary should sit on this band, meaning it is a percentage (in this case 20%) of what is left
+                    $tax_deductable += $salary*($tax_data["rate"]/100); // if applicable, the persons salary should sit on this band, meaning it is a percentage (in this case 20%) of what is left
+                    echo $tax_band." tax added from total tax ".$tax_deductable."<br>";
+                    echo $tax_band." remaining salary ".$salary."<br>";
                     $net_salary -= $tax_deductable; //removes this tax from total salary
                 }
+
+
                     try{
                         if($currency!==$current_working_currency){ //if currency was converted, convert back  
                             $tax_deductable=exchange_currenncy($tax_deductable,$current_working_currency,true);
                             $net_salary=exchange_currenncy($net_salary,$current_working_currency,true); //true indicates to revert the calculation
                         }
+
                         $calculated_values["salary_year"] = $person["salary"];
                         $calculated_values["tax_year"] = $tax_deductable;
                         $calculated_values["net_salary_year"] = $net_salary;
@@ -114,20 +131,27 @@ function calculate_standard_tax($person, $currency){ //currency_rates must be ge
         }else{
             if($tax_band == "tax_band_1"){
                 if($person_tax_band == "tax_band_4" && $person["companycar"]=="y"){
-                    $salary -= $tax_band["maxsalary"];
-                }elseif($person_tax_band == "tax_band_4"){
-                    $salary -= 0.5*$tax_band["maxsalary"];
-                }elseif($person["companycar"]=="y"){
-                    $salary -= $tax_band["maxsalary"];
-                }else{
+                    echo "has car and is in ".$tax_band."<br>";
                     continue;
+                }elseif($person["companycar"]=="y"){
+                    echo "has car<br>";
+                    continue;
+                }elseif($person_tax_band == "tax_band_4"){
+                    echo "50% reduction as is in ".$tax_band."<br>";
+                    $salary -= 0.5*$tax_data["maxsalary"];
+                }else{
+                    $salary -= $tax_data["maxsalary"];
                 }
-            }
-            $salary -= $tax_band["maxsalary"]; //takes away max band to work out what is left
-            $tax_deductable += $tax_band["maxsalary"]*($tax_band["rate"]/100);
+                continue;
+             }
+             $salary -= $tax_data["maxsalary"]; //takes away max band to work out what is left
+             echo "person salary left at ".$tax_band." is ".$salary."<br>";
+             $tax_deductable += $tax_data["maxsalary"]*($tax_data["rate"]/100);
+            
         }
-     }
+      }
 }
+  
 
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
