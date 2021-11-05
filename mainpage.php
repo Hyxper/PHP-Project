@@ -44,17 +44,17 @@
         require __DIR__ . '/functions.php';
 
         session_start();
-        $GBP_rates = currency_conversion("GBP");
-        $personel = create_personel_data("GBP",$GBP_rates);
-        $tax_information = create_tax_data();
+        $GLOBALS["currency_rate"] = currency_conversion("gbp");
+        $GLOBALS["tax_data"] = create_tax_data("./tax-tables.json");
+        $personel = create_personel_data("GBP");
 
         foreach($personel as $person){
-            $returned_values=calculate_standard_tax($person, $tax_information, "GBP", $GBP_rates);
+            $returned_values=calculate_standard_tax($person,"GBP");
             $ID_name = $person["id"]."_".$person["firstname"]."_".$person["lastname"];
             $_SESSION[$ID_name] = $person; //$returned_values;
             $_SESSION[$ID_name]["calculated_salary_and_tax_info"]=$returned_values;
-       echo
-       "
+             echo
+             "
             <tr>
                 <th scope='row' id='".$ID_name."_ID'>".$person["id"]."</th>
                 <td id='".$ID_name."_photo' class='text-center'> <a href='https://placeholder.com'><img src='https://via.placeholder.com/100'></td>
