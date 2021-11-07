@@ -1,13 +1,22 @@
 <?php
 
 session_start();
+require __DIR__ . '/functions.php';
 
 $logindetails = array("username"=> $_POST["username"],"password" => $_POST["password"]); // what to check
 
 //read JSON containing user data
-$userdata = array();
-$json = file_get_contents("./users.json");
-$userdata = json_decode($json,true); //stores this into an array
+$userfile ="./users.json";
+try{
+    if(is_json($userfile)==true){
+        $json = file_get_contents($userfile);
+        $userdata = json_decode($json,true); //stores this into an array
+    }
+}
+catch(Exception $e){
+    echo $e->getMessage();
+    exit();
+    }
 
 
 foreach($userdata as $user){
