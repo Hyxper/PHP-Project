@@ -11,17 +11,25 @@
 function create_personel_data($currency_to_work_in){ // creates data for each person on list. Supplied with desired currency to exchange and base tax bands accordingly.
     $personeldatapre = array();
     $personeldata = array();
+    $employeefile = "./employees-final.json";
 
-    $json = file_get_contents("./employees-final.json");
-    $personeldatapre = json_decode($json,true);
-
+    if(is_json($employeefile) == true){
+        $json = file_get_contents("./employees-final.json");
+        $personeldatapre = json_decode($json,true);
+    }
+    
     foreach($personeldatapre as $person){
         $elementrename =  $person["id"]."_".$person["firstname"]."_".$person["lastname"];
         $personeldata[$elementrename] = $person;
         $elementrename=""; 
     } //this adds the ID, firstname and last name to the parent array element, rather than normal.
  
-    $taxdata = $GLOBALS["tax_data"];
+    if(isset($GLOBALS["tax_data"])==false){
+        throw new Exception("tax data is not set!");
+    }else{
+        $taxdata = $GLOBALS["tax_data"];
+    }
+    
     
     foreach($personeldata as $key=>$person){
         if($person["currency"]!==$currency_to_work_in){
@@ -47,8 +55,12 @@ function create_personel_data($currency_to_work_in){ // creates data for each pe
 function create_tax_data($tax_data_file){ //can crate array of tax info. very reusalble when this information is required. Requires a tax data file (JSON) that matches the format of the original.
     $taxdatapre = array();
     $taxdata = array();
-    $json = file_get_contents($tax_data_file);
-    $taxdatapre = json_decode($json,true);
+    if(is_json($tax_data_file) == true){
+        if(verify_tax_file($tax_data_file)==true){
+            $json = file_get_contents($tax_data_file);
+            $taxdatapre = json_decode($json,true);
+        }
+    }  
     foreach($taxdatapre as $tax){
         $elementrename =  "tax_band_".$tax["id"];
         $taxdata[$elementrename] = $tax;
@@ -72,8 +84,14 @@ function calculate_standard_tax($person, $currency){ //passes in person (array) 
     $current_working_currency = $person["currency"]; //currency someone is paid in (to check and exchange if neccesary)
     $tax_deductable =0.00; //total of how much tax to deduct from net_salary
     $calculated_values = array(); //values to return to the user after calculating
-    $tax_information = $GLOBALS["tax_data"];//assigns all relevant tax data for this function
 
+
+    if(isset($GLOBALS["tax_data"])==false){
+        throw new Exception("tax data is not set!");
+    }else{
+        $tax_information = $GLOBALS["tax_data"];//assigns all relevant tax data for this function
+    }
+    
     if($currency!==$current_working_currency){
         try{
         $salary = exchange_currenncy($salary,$current_working_currency); //exchange currency if persons currency does not match working.
@@ -196,7 +214,13 @@ function format_currency_EUR($value){
 function exchange_currenncy($amount,$exchange_currency,$revert = false){ //this takes a generated array of exchange rates (see currency conversion), amount to exchange, what to exchange to/from 
     $amount = (float) $amount;
     $check_if_exists = 0;
-    $rates = $GLOBALS["currency_rate"];
+
+    if(isset($GLOBALS["currency_rate"])==false){
+        throw new Exception("Currency conversion rates not set!");
+    }else{
+        $rates = $GLOBALS["currency_rate"];
+    }
+
 
     foreach($rates as $currency=>$value){
         if(strcmp($currency,$exchange_currency)!==0){
@@ -221,40 +245,17 @@ function exchange_currenncy($amount,$exchange_currency,$revert = false){ //this 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 function currency_conversion($currency_convert_from){ //creates an array of currency values from an API. will take any input that the API supports (USD, JPY, EUR etc) and return the conversion rates for the availble "format_currency_" functions.
     $currency_convert_from = strtoupper($currency_convert_from); //makes it so can be entered lower case.
-    $arrayofconversion = array(); //array that will contain all of the conversion rates
-    $api_key = "04f44a4054msh92583eb306794d9p1f7b99jsn27c76c1fd7d8"; //key needed to interface with API
+    $converted_currencies = array(); //array that will contain all of the conversion rates
+    $key = "04f44a4054msh92583eb306794d9p1f7b99jsn27c76c1fd7d8"; //key needed to interface with API
 
-    $curl = curl_init(); //start process
-    curl_setopt_array($curl, [
-        CURLOPT_URL => "https://currency-exchange.p.rapidapi.com/listquotes",
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_SSL_VERIFYHOST => 0,
-        CURLOPT_SSL_VERIFYPEER => 0,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 30,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => [
-            "x-rapidapi-host: currency-exchange.p.rapidapi.com",
-            "x-rapidapi-key: ".$api_key
-        ],
-    ]);
-    $response = curl_exec($curl);
-    $err = curl_error($curl);
-    curl_close($curl);
-    if ($err) {
-       throw new Exception("cURL Error when checking available currencies on API #:" . $err); //reports if there was an error getting data
-    } else {
-        $available_currencies=array();
-        foreach(explode('"',$response) as $str){ //filter out response from API, contained commas and brackets
+        $available_currencies=array(); //check api to see what currencies it supports
+        foreach(explode('"',API_Invoke("https://currency-exchange.p.rapidapi.com/listquotes",$key, "error when querying available currencies:")) as $str){ //filter out response from API, contained commas and brackets
             if(preg_match("/[\[,\]]/",$str) == 0){ //filters string with regeular expression
                         array_push($available_currencies,$str); //this will only push elements from the string that are valid (Currencies)
             }
         }
             $check_if_exists = 0;
-            foreach($available_currencies as $currency){ //this section will go through each element and check for a match, if the counter is not equal to the array length, means the input from user was invalid
+            foreach($available_currencies as $currency){ //this section will go through each element and check for a match, if the counter is not equal to the array length, means the input from user was invalid (isnt supported)
                 if(strcmp($currency_convert_from, $currency)!==0){
                     $check_if_exists += 1;  
                 }
@@ -262,37 +263,42 @@ function currency_conversion($currency_convert_from){ //creates an array of curr
             if($check_if_exists == count($available_currencies)){
                 throw new Exception(available_functions($available_currencies,"Currency format is not available from API, availble currencies are:"));
             }
-    }
-    foreach(check_currency_functions() as $function){ //this ensures that conversion rates are only added that have a existing formatting function. More functions means more support.
-    $currency_convert_to = strtoupper(substr($function,-3));   //will always be denoted by last 3 letters (GBP, EUR, USD, JPY)
-    $curl = curl_init();
-    curl_setopt_array($curl, [
-        CURLOPT_URL => "https://currency-exchange.p.rapidapi.com/exchange?from=".$currency_convert_from."&to=".$currency_convert_to, //concat what has been entered, with what is available.
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_SSL_VERIFYHOST => 0,
-        CURLOPT_SSL_VERIFYPEER => 0,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 30,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => [
-            "x-rapidapi-host: currency-exchange.p.rapidapi.com",
-            "x-rapidapi-key: ".$api_key
-        ],
-    ]);
-    $response = curl_exec($curl);
-    $err = curl_error($curl);
-    curl_close($curl);    
-    if ($err) {
-        throw new exception("cURL Error when gathering currency exchange rates #:" . $err);
-    } else {
-        $arrayofconversion[$currency_convert_to] = $response; //appends to array.
-    }
-  }
-    return $arrayofconversion; 
-}   
+
+        foreach(check_currency_functions() as $function){ //this ensures that conversion rates are only added that have a existing formatting function. More functions means more support.
+        $currency_convert_to = strtoupper(substr($function,-3));   //will always be denoted by last 3 letters (GBP, EUR, USD, JPY)
+        $converted_currencies[$currency_convert_to] = API_Invoke("https://currency-exchange.p.rapidapi.com/exchange?from=".$currency_convert_from."&to=".$currency_convert_to,$key,"cURL Error when gathering currency exchange rates:"); //appends to array.
+        }
+    return $converted_currencies; 
+}
+
+ function API_Invoke($URL, $API_key,$err_msg="error"){
+
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $URL,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_SSL_VERIFYHOST => 0,
+            CURLOPT_SSL_VERIFYPEER => 0,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+            CURLOPT_HTTPHEADER => [
+                "x-rapidapi-host: currency-exchange.p.rapidapi.com",
+                "x-rapidapi-key: ".$API_key
+            ],
+        ]);
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+        curl_close($curl);    
+        if ($err) {
+            throw new exception($err_msg." ".$err);
+        }else{
+            return $response;
+        }
+}
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------AUXILLARY FUNCTIONS-------------------------------------------------------------------------------------------------------------
@@ -322,5 +328,58 @@ function available_functions($functions,$message=""){ //will just tell you what 
         }
         echo "</ul>";
 }
+
+function is_json($file){
+    $json = file_get_contents($file);
+    json_decode($json);
+    if(json_last_error() !== JSON_ERROR_NONE){
+     throw new Exception("File located at ".$file." is not JSON.");
+    }
+    if(json_last_error() !==0){
+        throw new Exception("Error has been found when passing JSON file:".json_last_error_msg());
+    }
+    return true;
+ }
+
+function verify_tax_file($file){
+    $json = file_get_contents($file);
+    $contents = json_decode($json,true);
+
+    foreach($contents as $key=>$criteria){
+        if(array_key_exists("id",$criteria)){
+            if(!is_numeric($criteria["id"])){
+                throw new Exception("value in element ".$key." for ID is invalid");
+            }
+        }else{
+            throw new Exception("element ".$key." requires ID field");
+        }
+        if(array_key_exists("minsalary",$criteria)){
+            if(!is_numeric($criteria["minsalary"])){
+                throw new Exception("value in element ".$key." for minsalary is invalid");
+            }
+        }else{
+            throw new Exception("element ".$key." requires minsalary field");
+        }
+        if(array_key_exists("maxsalary",$criteria)){
+            if(!is_numeric($criteria["maxsalary"])){
+                throw new Exception("value in element ".$key." for maxsalary is invalid");
+            }
+        }else{
+            throw new Exception("element ".$key." requires maxsalary field");
+        }
+        if(array_key_exists("rate",$criteria)){
+            if(!is_numeric($criteria["rate"])){
+                throw new Exception("value in element ".$key." for rate is invalid");
+            }
+        }else{
+            throw new Exception("element ".$key." requires rate field");
+        }
+      }  
+      return true;
+    }
+
+
+
+
 
 ?>

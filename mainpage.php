@@ -44,12 +44,30 @@
         require __DIR__ . '/functions.php';
 
         session_start();
-        $GLOBALS["currency_rate"] = currency_conversion("gbp");
-        $GLOBALS["tax_data"] = create_tax_data("./tax-tables.json");
-        $personel = create_personel_data("GBP");
+
+        try{ //wrap all essential functions in a try loop, this ensures any problems will be caught, all exceptions thrown shall be caught.
+            $GLOBALS["working_currency"]="GBP";//define set currency to use--------------------NEEDED--------------------
+            $GLOBALS["currency_rate"] = currency_conversion($GLOBALS["working_currency"]); //calculate currency exchange rates (works out 1 > other currencies. In this case will call api to check what £1 is in USD, EUR)--------------------NEEDED--------------------
+            $GLOBALS["tax_data"] = create_tax_data("./tax-tables.json"); //define tax table to use --------------------NEEDED--------------------   
+            $personel = create_personel_data($GLOBALS["working_currency"]); //creates our personel data. Feed our working currency, so in case someone is not paid in £, will be able to exchange. Also used for working out in different currency.--------------------NEEDED--------------------
+            }
+            catch(Exception $e){
+            echo $e->getMessage();
+            exit();
+            }
+        //try block here will attempt to catch any problems with currency conversion/API interfacing issues
+        
+      
 
         foreach($personel as $person){
-            $returned_values=calculate_standard_tax($person,"GBP");
+            try{
+                $returned_values=calculate_standard_tax($person,$GLOBALS["working_currency"]);
+            }
+            catch(Exception $e){
+            echo $e->getMessage();
+            exit();
+            }
+            
             $ID_name = $person["id"]."_".$person["firstname"]."_".$person["lastname"];
             $_SESSION[$ID_name] = $person; //$returned_values;
             $_SESSION[$ID_name]["calculated_salary_and_tax_info"]=$returned_values;
