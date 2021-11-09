@@ -33,7 +33,7 @@ function create_personel_data($currency_to_work_in){ // creates data for each pe
     
     foreach($personeldata as $key=>$person){
         if($person["currency"]!==$currency_to_work_in){
-        $salarytocheck = exchange_currenncy($person["salary"],$person["currency"]);
+        $salarytocheck = exchange_currency($person["salary"],$person["currency"]);
         }else{
         $salarytocheck = $person["salary"];     
         }
@@ -51,8 +51,8 @@ function create_personel_data($currency_to_work_in){ // creates data for each pe
     return $personeldata;
 }
 
-
-function create_tax_data($tax_data_file){ //can crate array of tax info. very reusalble when this information is required. Requires a tax data file (JSON) that matches the format of the original.
+                                        
+function create_tax_data($tax_data_file,$currency_of_file){ //can crate array of tax info. very reusalble when this information is required. Requires a tax data file (JSON) that matches the format of the original.
     $taxdatapre = array();
     $taxdata = array();
     if(is_json($tax_data_file) == true){
@@ -67,6 +67,22 @@ function create_tax_data($tax_data_file){ //can crate array of tax info. very re
         $elementrename=""; 
     } //this creates an array from tax rate JSON, renaming the parent element to the tax band, and removing the name elemen
 
+    if ($currency_of_file !==  $GLOBALS["working_currency"]){
+        foreach($taxdata as $key=>&$tax_band){
+            if($key == "tax_band_1"){
+                $tax_band["maxsalary"] = round(exchange_currency($tax_band["maxsalary"],$currency_of_file),2);
+                continue;
+            }
+            if($key == "tax_band_4"){
+                $tax_band["minsalary"] = round(exchange_currency($tax_band["minsalary"],$currency_of_file),2);
+                continue;
+                }   
+           $tax_band["minsalary"] = round(exchange_currency($tax_band["minsalary"],$currency_of_file),2);
+           $tax_band["maxsalary"] = round(exchange_currency($tax_band["maxsalary"],$currency_of_file),2);
+           
+        }
+      
+    }
     return $taxdata;
 }
 
@@ -94,7 +110,7 @@ function calculate_standard_tax($person, $currency){ //passes in person (array) 
     
     if($currency!==$current_working_currency){
         try{
-        $salary = exchange_currenncy($salary,$current_working_currency); //exchange currency if persons currency does not match working.
+        $salary = exchange_currency($salary,$current_working_currency); //exchange currency if persons currency does not match working.
         $net_salary = $salary;
         }catch(Exception $e){
             echo $e->getMessage();//if the currency isnt supported, this will catch an exception and report to the user what is available.
@@ -109,21 +125,30 @@ function calculate_standard_tax($person, $currency){ //passes in person (array) 
                     $net_salary -= $tax_deductable; //removes the tax from total salary to work out net.
                 }
                     try{
-                        if($currency!==$current_working_currency){ //if currency was converted, convert back  
-                            $tax_deductable=exchange_currenncy($tax_deductable,$current_working_currency,true);//exchange back to working currency
-                            $net_salary=exchange_currenncy($net_salary,$current_working_currency,true); //true indicates to revert the calculation
+                        if($currency=="GBP"){ //if currency was converted, convert back  (only if default GBP is set as currency)
+                            $tax_deductable=exchange_currency($tax_deductable,$current_working_currency,true);//exchange back to working currency
+                            $net_salary=exchange_currency($net_salary,$current_working_currency,true); //true indicates to revert the calculation
                         }
 
                         //asigns array to be returned, contains all info needed to inform whomever on tax information.
-                        $calculated_values["salary_year"] = $person["salary"];
+                        if($currency == "GBP"){
+                            $calculated_values["salary_year"] = $person["salary"];
+                            $calculated_values["salary_month"] = $calculated_values["salary_year"]/12;
+                        }else{
+                            $calculated_values["salary_year"] = exchange_currency($person["salary"],$current_working_currency);
+                            $calculated_values["salary_month"] = exchange_currency($calculated_values["salary_year"]/12,$current_working_currency);
+                        }
                         $calculated_values["tax_year"] = $tax_deductable;
+                        $calculated_values["tax_month"] = $calculated_values["tax_year"]/12;
                         $calculated_values["net_salary_year"] = $net_salary;
-                        $calculated_values["salary_month"] = $person["salary"]/12;
-                        $calculated_values["tax_month"] = $tax_deductable/12;
-                        $calculated_values["net_salary_month"] = $net_salary/12;
-
+                        $calculated_values["net_salary_month"] = $calculated_values["net_salary_year"]/12;
                         foreach($calculated_values as $key=>$calc_value){ //for each element in array, process the value to be applicable currency
-                        $calculated_values[$key]=process_value($calc_value,$current_working_currency);
+                            if($currency=="GBP"){
+                                $calculated_values[$key]=process_value($calc_value,$current_working_currency); //so person in dollars salary is displayed correctly (DEFUALT VALUE)
+                            }else{
+                                $calculated_values[$key]=process_value($calc_value,$currency); //OTHERWISE DISPLAY ALL AS SELECTED CURRENCY
+                            }
+                        
                         }
                         return $calculated_values; //returns to user.           
                     }
@@ -133,7 +158,7 @@ function calculate_standard_tax($person, $currency){ //passes in person (array) 
                     }
         }else{
             //exceptions center. in this case for the project, people in tax band 4 earn 50% personal allowance, and dont get any if they have a car. added check for currency incase I want to add other exceptions.
-            if($tax_band == "tax_band_1" && $currency == "GBP"){
+            if($tax_band == "tax_band_1"){
                 if($person_tax_band == "tax_band_4" && $person["companycar"]=="y"){
                     continue;
                 }elseif($person["companycar"]=="y"){
@@ -211,7 +236,7 @@ function format_currency_EUR($value){
 //-----------------------------------------------------------------------------------------------EXCHANGE CURRENCY---------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-function exchange_currenncy($amount,$exchange_currency,$revert = false){ //this takes a generated array of exchange rates (see currency conversion), amount to exchange, what to exchange to/from 
+function exchange_currency($amount,$exchange_currency,$revert = false){ //this takes a generated array of exchange rates (see currency conversion), amount to exchange, what to exchange to/from 
     $amount = (float) $amount;
     $check_if_exists = 0;
 
