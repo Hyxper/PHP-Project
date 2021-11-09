@@ -13,6 +13,7 @@
     
     <?php
         session_start();
+        set_timezone("GMT");
         require __DIR__ . '/functions.php';
         $person = $_GET["person"];
         if (isset($_SESSION[$person])){

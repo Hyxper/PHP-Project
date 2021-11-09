@@ -240,21 +240,16 @@ function exchange_currency($amount,$exchange_currency,$revert = false){ //this t
     $amount = (float) $amount;
     $check_if_exists = 0;
 
-    echo "echoed vars: ".$amount." ".$exchange_currency;
     if(isset($GLOBALS["currency_rate"])==false){
         throw new Exception("Currency conversion rates not set!");
     }else{
         $rates = $GLOBALS["currency_rate"];
-        print_r($rates);
     }
-
-
     foreach($rates as $currency=>$value){
         if(strcmp($currency,$exchange_currency)!==0){
             $check_if_exists += 1;  
         }
     }
-
     if($check_if_exists == count($rates)){
         throw new Exception(available_functions($rates,"'".$exchange_currency."' is not supported for coversion. Supported currencies are:")); //will complain if supplied currency is not supported
     }else{      
@@ -267,17 +262,24 @@ function exchange_currency($amount,$exchange_currency,$revert = false){ //this t
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-//-----------------------------------------------------------------------------------------------API FUNCTIONS-------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------api FUNCTIONS-------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-function currency_conversion($currency_convert_from){ //creates an array of currency values from an API. will take any input that the API supports (USD, JPY, EUR etc) and return the conversion rates for the availble "format_currency_" functions.
+function currency_conversion($currency_convert_from){ //creates an array of currency values from an api. will take any input that the api supports (USD, JPY, EUR etc) and return the conversion rates for the availble "format_currency_" functions.
     $currency_convert_from = strtoupper($currency_convert_from); //makes it so can be entered lower case.
     $converted_currencies = array(); //array that will contain all of the conversion rates
-    $key = "04f44a4054msh92583eb306794d9p1f7b99jsn27c76c1fd7d8"; //key needed to interface with API
-    $rate_file = "./JSON/conversion_rates.json"; //file needed to replace redudant values if API is returning zero, updates when all are read back.
+    $key = "04f44a4054msh92583eb306794d9p1f7b99jsn27c76c1fd7d8"; //key needed to interface with api
+    $rate_file = "./JSON/conversion_rates.json"; //file needed to replace redudant values if api is returning zero, updates when all are read back.
+
+        if(is_json($rate_file)==true){  
+            $rate_file_data = array();
+            $json = file_get_contents($rate_file);
+            $rate_file_data = json_decode($json,true);
+        }
+
 
         $available_currencies=array(); //check api to see what currencies it supports
-        foreach(explode('"',API_Invoke("https://currency-exchange.p.rapidapi.com/listquotes",$key, "error when querying available currencies:")) as $str){ //filter out response from API, contained commas and brackets
+        foreach(explode('"',api_invoke("https://currency-exchange.p.rapidapi.com/listquotes",$key, "error when querying available currencies:")) as $str){ //filter out response from api, contained commas and brackets
             if(preg_match("/[\[,\]]/",$str) == 0){ //filters string with regeular expression
                         array_push($available_currencies,$str); //this will only push elements from the string that are valid (Currencies)
             }
@@ -289,46 +291,30 @@ function currency_conversion($currency_convert_from){ //creates an array of curr
                 }
             }
             if($check_if_exists == count($available_currencies)){
-                throw new Exception(available_functions($available_currencies,"Currency format is not available from API, availble currencies are:"));
+                throw new Exception(available_functions($available_currencies,"Currency format is not available from api, availble currencies are:"));
             }
 
         foreach(check_currency_functions() as $function){ //this ensures that conversion rates are only added that have a existing formatting function. More functions means more support.
-            $currency_convert_to = strtoupper(substr($function,-3));   //will always be denoted by last 3 letters (GBP, EUR, USD, JPY)
-            // $converted_currencies[$currency_convert_to] = API_Invoke("https://currency-exchange.p.rapidapi.com/exchange?from=".$currency_convert_from."&to=".$currency_convert_to,$key,"cURL Error when gathering currency exchange rates:"); //appends to array.
-            if(API_Invoke("https://currency-exchange.p.rapidapi.com/exchange?from=".$currency_convert_from."&to=".$currency_convert_to,$key,"cURL Error when gathering currency exchange rates:")==0){
-                if(is_json($rate_file)==true){
-                    //unload data from JSON
-                    $converted_currencies[$currency_convert_to] = $rate_file[$currency_convert_to."_rates"][$currency_convert_to];
+
+                $currency_convert_to = strtoupper(substr($function,-3));   //will always be denoted by last 3 letters (GBP, EUR, USD, JPY)
+                $returned_val = api_invoke("https://currency-exchange.p.rapidapi.com/exchange?from=".$currency_convert_from."&to=".$currency_convert_to,$key,"cURL Error when gathering currency exchange rates:");
+
+                if($returned_val==0){//API is prone to sending zero as a response in cases where data cannoth be gathered. Stops divide by zero errors and continuity.
+                    $converted_currencies[$currency_convert_to] = $rate_file_data[$currency_convert_from."_rates"][$currency_convert_to]; //makes array im returning a hisotical returned value gathered from successful interfacing
+                }else{//else use the value API has returned, and update the JSON file with the newest rate in case API falls over.
+                    $converted_currencies[$currency_convert_to] = $returned_val; //appends to array.
+                    $rate_file_data[$currency_convert_from."_rates"][$currency_convert_to] = $returned_val; //update file
+                    $rate_file_data["last_updated"]=date('D M j G:i:s a'); //set date last updated on file
+                    $updater = json_encode($rate_file_data);//encode file as json
+                    file_put_contents($rate_file,$updater);//place encoded data back into file
                 }
-            }else{
-                //backup data into file.
-            }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             }
             return $converted_currencies; 
         }
 
-}
 
- function API_Invoke($URL, $API_key,$err_msg="error"){
+
+ function api_invoke($URL, $api_key,$err_msg="error"){
 
         $curl = curl_init();
         curl_setopt_array($curl, [
@@ -344,7 +330,7 @@ function currency_conversion($currency_convert_from){ //creates an array of curr
             CURLOPT_CUSTOMREQUEST => "GET",
             CURLOPT_HTTPHEADER => [
                 "x-rapidapi-host: currency-exchange.p.rapidapi.com",
-                "x-rapidapi-key: ".$API_key
+                "x-rapidapi-key: ".$api_key
             ],
         ]);
         $response = curl_exec($curl);
@@ -373,9 +359,6 @@ function check_currency_functions(){ //creates an array of available functions, 
     }
     return $currency_functions;
 }
-
-
-// 
 
 function available_functions($functions,$message=""){ //will just tell you what functions are available based on what is passed in. formatted as a list. can supply optional message.
         echo $message."<br>";
@@ -435,7 +418,11 @@ function verify_tax_file($file){
       return true;
     }
 
-
+function set_timezone($timezone){ //if timezone has not been set in session, set timezone.
+    if(isset($_SESSION["timezone"])==false){
+        date_default_timezone_set($timezone);
+    }
+}
 
 
 

@@ -2,6 +2,7 @@
 
 session_start();
 require __DIR__ . '/functions.php';
+set_timezone("GMT");
 
 $logindetails = array("username"=> $_POST["username"],"password" => $_POST["password"]); // what to check
 

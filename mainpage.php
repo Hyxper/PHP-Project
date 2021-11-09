@@ -19,34 +19,43 @@
         </nav>
         
         
-        
-        <table class='table table-bordered table-light table-hover table-striped text-center'>
-            <thead class='text-center'>
-            <tr>
-                <th scope='col'>ID</th>
-                <th scope='col'>Photo</th>
-                <th scope='col'>Surname</th>
-                <th scope='col'>First name</th>
-                <th scope='col'>Job title</th>
-                <th scope='col'>Department</th>
-                <th scope='col'>Salary</th>
-                <th scope='col'>Tax per year</th>
-                <th scope='col'>Net per year</th>
-                <th scope='col'>Salary per month</th>
-                <th scope='col'>Tax per month</th>
-                <th scope='col'>Net pay per month</th>
-                <th scope='col'>Records</th>
-            </tr>
-            </thead>
-            <tbody>
+        <main>
+        <div class="container-fluid">
+            <div class="row d-flex">
+                 <div class="col-12 pt-4 text-center">
+                 <img src='https://via.placeholder.com/500x150'>
+                </div>
+                  <!-- container for form ere -->
+            </div>
+            <div class="row d-flex">
+                <div class="col-12 px-5 py-4">
+              
+                    <table class='table table-bordered table-light table-hover table-striped text-center'>
+                        <thead class='text-center'>
+                        <tr>
+                            <th scope='col'>ID</th>
+                            <th scope='col'>Photo</th>
+                            <th scope='col'>Surname</th>
+                            <th scope='col'>First name</th>
+                            <th scope='col'>Job title</th>
+                            <th scope='col'>Department</th>
+                            <th scope='col'>Salary</th>
+                            <th scope='col'>Tax per year</th>
+                            <th scope='col'>Net per year</th>
+                            <th scope='col'>Salary per month</th>
+                            <th scope='col'>Tax per month</th>
+                            <th scope='col'>Net pay per month</th>
+                            <th scope='col'>Records</th>
+                        </tr>
+                        </thead>
+                        <tbody>
         <?php
-
         require __DIR__ . '/functions.php';
-
         session_start();
+        set_timezone("GMT");
 
         try{ //wrap all essential functions in a try loop, this ensures any problems will be caught, all exceptions thrown shall be caught.
-            $GLOBALS["working_currency"]="GBP";//define set currency to use--------------------NEEDED--------------------     
+            $GLOBALS["working_currency"]="EUR";//define set currency to use--------------------NEEDED--------------------     
             $GLOBALS["currency_rate"] = currency_conversion($GLOBALS["working_currency"]); //calculate currency exchange rates (works out 1 > other currencies. In this case will call api to check what £1 is in USD, EUR)--------------------NEEDED--------------------
             $GLOBALS["tax_data"] = create_tax_data("./JSON/tax-tables.json","GBP"); //define tax table to use, ALSO CURRENCY TAX TABLE IS IN..... --------------------NEEDED--------------------
             $personel = create_personel_data($GLOBALS["working_currency"]); //creates our personel data. Feed our working currency, so in case someone is not paid in £, will be able to exchange. Also used for working out in different currency.--------------------NEEDED--------------------
@@ -92,7 +101,10 @@
         ?>
 
             </tbody>   
-        </table>
+            </table>
+            </div>
+        </div>
+        </main>
         
   
 
