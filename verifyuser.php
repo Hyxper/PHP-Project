@@ -6,7 +6,7 @@ require __DIR__ . '/functions.php';
 $logindetails = array("username"=> $_POST["username"],"password" => $_POST["password"]); // what to check
 
 //read JSON containing user data
-$userfile ="./users.json";
+$userfile ="./JSON/users.json";
 try{
     if(is_json($userfile)==true){
         $json = file_get_contents($userfile);

@@ -11,10 +11,10 @@
 function create_personel_data($currency_to_work_in){ // creates data for each person on list. Supplied with desired currency to exchange and base tax bands accordingly.
     $personeldatapre = array();
     $personeldata = array();
-    $employeefile = "./employees-final.json";
+    $employeefile = "./JSON/employees-final.json";
 
     if(is_json($employeefile) == true){
-        $json = file_get_contents("./employees-final.json");
+        $json = file_get_contents($employeefile);
         $personeldatapre = json_decode($json,true);
     }
     
@@ -33,9 +33,9 @@ function create_personel_data($currency_to_work_in){ // creates data for each pe
     
     foreach($personeldata as $key=>$person){
         if($person["currency"]!==$currency_to_work_in){
-        $salarytocheck = exchange_currency($person["salary"],$person["currency"]);
+            $salarytocheck = exchange_currency($person["salary"],$person["currency"]);
         }else{
-        $salarytocheck = $person["salary"];     
+            $salarytocheck = $person["salary"];     
         }
 
         foreach($taxdata as $taxband => $taxinfo){
@@ -240,10 +240,12 @@ function exchange_currency($amount,$exchange_currency,$revert = false){ //this t
     $amount = (float) $amount;
     $check_if_exists = 0;
 
+    echo "echoed vars: ".$amount." ".$exchange_currency;
     if(isset($GLOBALS["currency_rate"])==false){
         throw new Exception("Currency conversion rates not set!");
     }else{
         $rates = $GLOBALS["currency_rate"];
+        print_r($rates);
     }
 
 
@@ -272,6 +274,7 @@ function currency_conversion($currency_convert_from){ //creates an array of curr
     $currency_convert_from = strtoupper($currency_convert_from); //makes it so can be entered lower case.
     $converted_currencies = array(); //array that will contain all of the conversion rates
     $key = "04f44a4054msh92583eb306794d9p1f7b99jsn27c76c1fd7d8"; //key needed to interface with API
+    $rate_file = "./JSON/conversion_rates.json"; //file needed to replace redudant values if API is returning zero, updates when all are read back.
 
         $available_currencies=array(); //check api to see what currencies it supports
         foreach(explode('"',API_Invoke("https://currency-exchange.p.rapidapi.com/listquotes",$key, "error when querying available currencies:")) as $str){ //filter out response from API, contained commas and brackets
@@ -290,10 +293,39 @@ function currency_conversion($currency_convert_from){ //creates an array of curr
             }
 
         foreach(check_currency_functions() as $function){ //this ensures that conversion rates are only added that have a existing formatting function. More functions means more support.
-        $currency_convert_to = strtoupper(substr($function,-3));   //will always be denoted by last 3 letters (GBP, EUR, USD, JPY)
-        $converted_currencies[$currency_convert_to] = API_Invoke("https://currency-exchange.p.rapidapi.com/exchange?from=".$currency_convert_from."&to=".$currency_convert_to,$key,"cURL Error when gathering currency exchange rates:"); //appends to array.
+            $currency_convert_to = strtoupper(substr($function,-3));   //will always be denoted by last 3 letters (GBP, EUR, USD, JPY)
+            // $converted_currencies[$currency_convert_to] = API_Invoke("https://currency-exchange.p.rapidapi.com/exchange?from=".$currency_convert_from."&to=".$currency_convert_to,$key,"cURL Error when gathering currency exchange rates:"); //appends to array.
+            if(API_Invoke("https://currency-exchange.p.rapidapi.com/exchange?from=".$currency_convert_from."&to=".$currency_convert_to,$key,"cURL Error when gathering currency exchange rates:")==0){
+                if(is_json($rate_file)==true){
+                    //unload data from JSON
+                    $converted_currencies[$currency_convert_to] = $rate_file[$currency_convert_to."_rates"][$currency_convert_to];
+                }
+            }else{
+                //backup data into file.
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            }
+            return $converted_currencies; 
         }
-    return $converted_currencies; 
+
 }
 
  function API_Invoke($URL, $API_key,$err_msg="error"){
