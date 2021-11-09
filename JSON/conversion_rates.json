@@ -1,0 +1,21 @@
+
+    {
+        "GBP_rates": {
+            "GBP": 1,
+            "USD": 0,
+            "EUR": 0
+        },
+    
+        "EUR_rates": {
+            "GBP": 0,
+            "USD": 0,
+            "EUR": 1
+        },
+    
+    
+        "USD_rates": {
+            "GBP": 0,
+            "USD": 1,
+            "EUR": 0
+        }
+    }
