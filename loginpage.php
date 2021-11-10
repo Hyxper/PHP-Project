@@ -25,7 +25,9 @@
               <p class="text-white-50 mb-2">Please enter your username and password.</p>
               
                 <?php
+                require __DIR__ . '/functions.php';
                 session_start();
+                set_timezone("GMT");
                 if(isset($_SESSION["usercreds"])){ 
                     if($_SESSION["usercreds"] == 1){
                         echo

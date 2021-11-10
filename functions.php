@@ -425,5 +425,42 @@ function set_timezone($timezone){ //if timezone has not been set in session, set
 }
 
 
+function check_tax_files($dir,$for_form = false){
+    $returned_files = array();
+    $temp = array();
+
+    if($for_form == true){
+        foreach(scandir($dir) as $file){
+            if(preg_match("/tax-tables/",$file) !== 0){
+
+                if(preg_match("/tax-tables\.json/",$file) !== 0){
+                    $temp = array("file"=>$file, "reigon"=>"British", "code" => "GBP");
+                    array_push($returned_files,$temp);
+                }
+
+                if(preg_match("/tax-tables_USD/",$file) !== 0){
+                    if(preg_match("/(^tax-tables)/",$file) !== 0)
+                        $temp = array("file"=>$file, "reigon"=>"American", "code" => "USD");
+                        array_push($returned_files,$temp);
+                }
+
+                if(preg_match("/tax-tables_EUR/",$file) !== 0){
+                    if(preg_match("/(^tax-tables)/",$file) !== 0)
+                        $temp = array("file"=>$file, "reigon"=>"European", "code" => "EUR");
+                        array_push($returned_files,$temp);
+                }
+            }
+        
+        }
+        return $returned_files;
+    }else{
+        foreach(scandir($dir) as $file){
+            if(preg_match("/tax-tables/",$file) !== 0){
+                array_push($returned_files,$file);
+             }
+        }
+    return $returned_files;
+    }  
+}
 
 ?>

@@ -47,27 +47,65 @@ $GLOBALS["currency_rate"] = currency_conversion($GLOBALS["working_currency"]); /
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link href="/styles.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>Main Page</title>
 </head>
 
-<h1>meatballs</h1>
+
 <body>
 
+<div class="container-fluid">
+            <div class="row d-flex justify-content-center">
+                <div class="container d-flex w-50 border border-secondary">
+                    <form class="form-inline" action="test.php" method="POST">
+                        <div class="form-group">
+                            <label for="currency_sel">Select Currency Type:</label>
+                            <select type="text" class="form-control" id="currency_sel" name="currency_sel">
+                                <?php
+                                    foreach(check_currency_functions() as $currency){
+                                        $currency_returned = strtoupper(substr($currency,-3));
+                                        echo "<option>".$currency_returned."</option>";
+                                    }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="currency_sel">Select Tax Band:</label>
+                            <select type="text" class="form-control" id="tax_sel" name="tax_sel">
+                                <?php
+                                    foreach(check_tax_files("./JSON",true) as $file){
+                                        echo "<option>".$file["reigon"]."</option>";
+                                    }
+                                ?>
+                            </select>
+                        </div>
+                        <button class="btn btn-outline-dark btn-lg px-5" type="submit" name="submit">Login</button>
+                    </form>             
+                </div>
+        </div>
+</div>
 
-<script>
-
-    console.log("my names deez");
-
-</script>
 
 
 </body>
 </html>
 
 <?php
+if(isset($_POST["currency_sel"])==false && isset($_POST["tax_sel"])==false){
+    $selectedcur = "GBP";
+    $selectedtax = "British";
+}else{
+    $selectedcur = $_POST["currency_sel"];
+    $selectedtax = $_POST["tax_sel"];
+}
+
+echo $selectedcur;
+echo "<br>";
+echo $selectedtax;
 
 
 ?>
