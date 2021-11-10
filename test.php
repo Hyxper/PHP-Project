@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/functions.php';
 session_start();
-$GLOBALS["working_currency"]="EUR";//define set currency to use--------------------NEEDED--------------------     
+$GLOBALS["working_currency"]="USD";//define set currency to use--------------------NEEDED--------------------     
 // try{
 $GLOBALS["currency_rate"] = currency_conversion($GLOBALS["working_currency"]); //calculate currency exchange rates (works out 1 > other currencies. In this case will call api to check what £1 is in USD, EUR)--------------------NEEDED--------------------
 // }catch(Exception $e){
@@ -23,6 +23,8 @@ $GLOBALS["currency_rate"] = currency_conversion($GLOBALS["working_currency"]); /
 
 
 
+
+
 // echo API_Invoke("https://currency-exchange.p.rapidapi.com/listquotes","04f44a4054msh92583eb306794d9p1f7b99jsn27c76c1fd7d8")."<br>";
 // echo (API_Invoke("https://currency-exchange.p.rapidapi.com/exchange?from=GBP&to=USD","04f44a4054msh92583eb306794d9p1f7b99jsn27c76c1fd7d8"));
 // echo "<br>";
@@ -32,11 +34,35 @@ $GLOBALS["currency_rate"] = currency_conversion($GLOBALS["working_currency"]); /
 // $updater_string = json_encode($conversion_backup);
 // file_put_contents("./JSON/conversion_rates.json",$updater_string);
 
-set_timezone("GMT");
-echo date('D M j G:i:s a');
+// set_timezone("GMT");
+// echo date('D M j G:i:s a');
 
 
 
 
 
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+
+<script>
+
+    console.log("my names deez");
+
+</script>
+
+
+</body>
+</html>
+
+
+

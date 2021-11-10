@@ -23,9 +23,16 @@
         <div class="container-fluid">
             <div class="row d-flex">
                  <div class="col-12 pt-4 text-center">
+                 <!-- container for form ere -->
                  <img src='https://via.placeholder.com/500x150'>
+                
+
+
+
+
+
                 </div>
-                  <!-- container for form ere -->
+                  
             </div>
             <div class="row d-flex">
                 <div class="col-12 px-5 py-4">
@@ -55,7 +62,7 @@
         set_timezone("GMT");
 
         try{ //wrap all essential functions in a try loop, this ensures any problems will be caught, all exceptions thrown shall be caught.
-            $GLOBALS["working_currency"]="EUR";//define set currency to use--------------------NEEDED--------------------     
+            $GLOBALS["working_currency"]="USD";//define set currency to use--------------------NEEDED--------------------     
             $GLOBALS["currency_rate"] = currency_conversion($GLOBALS["working_currency"]); //calculate currency exchange rates (works out 1 > other currencies. In this case will call api to check what £1 is in USD, EUR)--------------------NEEDED--------------------
             $GLOBALS["tax_data"] = create_tax_data("./JSON/tax-tables.json","GBP"); //define tax table to use, ALSO CURRENCY TAX TABLE IS IN..... --------------------NEEDED--------------------
             $personel = create_personel_data($GLOBALS["working_currency"]); //creates our personel data. Feed our working currency, so in case someone is not paid in £, will be able to exchange. Also used for working out in different currency.--------------------NEEDED--------------------

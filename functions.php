@@ -300,11 +300,11 @@ function currency_conversion($currency_convert_from){ //creates an array of curr
                 $returned_val = api_invoke("https://currency-exchange.p.rapidapi.com/exchange?from=".$currency_convert_from."&to=".$currency_convert_to,$key,"cURL Error when gathering currency exchange rates:");
 
                 if($returned_val==0){//API is prone to sending zero as a response in cases where data cannoth be gathered. Stops divide by zero errors and continuity.
-                    $converted_currencies[$currency_convert_to] = $rate_file_data[$currency_convert_from."_rates"][$currency_convert_to]; //makes array im returning a hisotical returned value gathered from successful interfacing
+                    $converted_currencies[$currency_convert_to] = $rate_file_data[$currency_convert_from."_rates"][$currency_convert_to]["rate"]; //makes array im returning a hisotical returned value gathered from successful interfacing
                 }else{//else use the value API has returned, and update the JSON file with the newest rate in case API falls over.
                     $converted_currencies[$currency_convert_to] = $returned_val; //appends to array.
-                    $rate_file_data[$currency_convert_from."_rates"][$currency_convert_to] = $returned_val; //update file
-                    $rate_file_data["last_updated"]=date('D M j G:i:s a'); //set date last updated on file
+                    $rate_file_data[$currency_convert_from."_rates"][$currency_convert_to]["rate"] = $returned_val; //update file
+                    $rate_file_data[$currency_convert_from."_rates"][$currency_convert_to]["last_updated"]=date('D M j G:i:s a'); //set date last updated on value
                     $updater = json_encode($rate_file_data);//encode file as json
                     file_put_contents($rate_file,$updater);//place encoded data back into file
                 }
