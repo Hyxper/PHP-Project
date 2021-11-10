@@ -1,5 +1,10 @@
 <?php
 require __DIR__ . '/functions.php';
+
+
+
+
+
 session_start();
 $GLOBALS["working_currency"]="USD";//define set currency to use--------------------NEEDED--------------------     
 // try{
@@ -37,10 +42,6 @@ $GLOBALS["currency_rate"] = currency_conversion($GLOBALS["working_currency"]); /
 // set_timezone("GMT");
 // echo date('D M j G:i:s a');
 
-
-
-
-
 ?>
 
 <!DOCTYPE html>
@@ -51,6 +52,8 @@ $GLOBALS["currency_rate"] = currency_conversion($GLOBALS["working_currency"]); /
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+
+<h1>meatballs</h1>
 <body>
 
 
@@ -63,6 +66,11 @@ $GLOBALS["currency_rate"] = currency_conversion($GLOBALS["working_currency"]); /
 
 </body>
 </html>
+
+<?php
+
+
+?>
 
 
 
