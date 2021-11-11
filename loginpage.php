@@ -55,8 +55,10 @@
                 <input type="password" id="typePassword" name ="password" class="form-control form-control-lg" required> <!-- added required so form cant process if empty -->
                 <label class="form-label" for="typePassword">Password</label>
               </div>
-
-              <button class="btn btn-outline-light btn-lg px-5" type="submit" name="submit">Login</button>
+              
+              <form action="test.php">
+              <button class="btn btn-lg px-5" type="submit" name="submit">Login</button>
+              </form>
 
             </div>
           </div>

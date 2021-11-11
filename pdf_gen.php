@@ -1,5 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
+
+session_start();
+require __DIR__ . '/dompdf/autoload.inc.php';
+
+if (isset( $_SESSION["pdf_details"])==false){
+    echo "ERROR: details to generate PDF have not been set.";
+    exit;
+}
+
+$details = $_SESSION["pdf_details"];
+
+use Dompdf\Dompdf;
+
+// instantiate and use the dompdf class
+$dompdf = new Dompdf();
+$dompdf->loadHtml('
 <style>
 table {
   font-family: arial, sans-serif;
@@ -37,6 +52,10 @@ td, th {
     background-color: #ffff66;
     font-weight: bold;
 }
+
+.center {
+  
+}
 </style>
 <head>
     <meta charset="UTF-8">
@@ -47,11 +66,11 @@ td, th {
 <body>
     <table>
         <tr>
-            <th colspan="4" rowspan="1" class="header">PAYSLIP FOR</th>
+            <th colspan="4" rowspan="1" class="header">PAYSLIP</th>
         </tr>
         <tr>
-            <th colspan="2">Name: </th>
-            <th colspan="2">Role: </th>
+            <th colspan="2">Name:'.$details["firstname"]." ".$details["lastname"].'</th>
+            <th colspan="2">Role: '.$details["jobtitle"].'</th>
         </tr>
         <tr>
             <th class="headings">Earnings</th>
@@ -61,9 +80,9 @@ td, th {
         </tr>
         <tr>
             <td>Basic</td>
-            <td class="content">999</td>
+            <td class="content">'.$details["calculated_salary_and_tax_info"]["salary_month"].'</td>
             <td>Tax</td>
-            <td class="content">999</td>
+            <td class="content">'.$details["calculated_salary_and_tax_info"]["tax_month"].'</td>
         </tr>
         <tr>
             <td>Leave Encashment</td>
@@ -97,16 +116,27 @@ td, th {
         </tr>
         <tr>
             <td>Total Earnings</td>
-            <td class="content">0.00</td>
+            <td class="content">'.$details["calculated_salary_and_tax_info"]["salary_month"].'</td>
             <td>Total Deductions</td>
-            <td class="content">0.00</td>
+            <td class="content">'.$details["calculated_salary_and_tax_info"]["tax_month"].'</td>
         </tr>
         <tr>
-            <td colspan="4" rowspan="1" class="footer">Net Pay: 999</td>
+            <td colspan="4" rowspan="1" class="footer">Net Pay: '.$details["calculated_salary_and_tax_info"]["net_salary_month"].'</td>
         </tr>
     </table>
-</body>
+</body>');
+
+
+// (Optional) Setup the paper size and orientation
+$dompdf->setPaper('A4', 'portrait');
+
+// Render the HTML as PDF
+$dompdf->render();
+
+// Output the generated PDF to Browser
+$dompdf->stream($details["id"]."_"."payslip")
+
+?>
 
 
 
-</html>

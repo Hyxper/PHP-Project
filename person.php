@@ -18,6 +18,7 @@
         $person = $_GET["person"];
         if (isset($_SESSION[$person])){
             $person = $_SESSION[$person];
+            $_SESSION["pdf_details"] = $person;
         }
     ?>  
 
@@ -211,6 +212,15 @@
                         </div>
                     </div>
                 </div>
+
+                <form action="pdf_gen.php">
+                    <button class="btn btn-lg px-5" type="submit" name="submit">Login</button>
+                </form>
+
+                <form action="mainpage.php">
+                    <button class="btn px-5" type="submit" name="submit">back</button>
+                </form>
+
             </div>
         </div>
     </div>
@@ -219,5 +229,6 @@
             </tbody>   
         </table>
         
+
     </body>
 </html>
