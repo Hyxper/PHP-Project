@@ -1,0 +1,36 @@
+[{
+    "id": 1,
+    "minsalary": 0,
+    "maxsalary": 10085,
+    "rate": 0
+},
+
+{
+    "id": 2,
+    "minsalary": 10085.01,
+    "maxsalary": 25771,
+    "rate": 11
+},
+
+ {
+    "id": 3,
+    "minsalary": 25771.01,
+    "maxsalary": 73516,
+    "rate": 30
+},
+
+{
+    "id": 4,
+    "minsalary": 73516.01,
+    "maxsalary": 158222,
+    "rate": 41
+},
+
+{
+    "id": 5,
+    "minsalary": 158222.01,
+    "maxsalary": 9999999999999,
+    "rate": 45
+}
+
+]

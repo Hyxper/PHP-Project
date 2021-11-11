@@ -147,32 +147,13 @@
                         <div class="text-center lh-1 mb-2">
                             <h6 class="fw-bold">Payslip</h6> <span class="fw-normal">Payment slip for the month of June 2021</span>
                         </div>
-                        <div class="d-flex justify-content-end"> <span>Working Branch:PGSUS</span> </div>
+        
                         <div class="row">
                             <div class="col-md-10">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div> <span class="fw-bolder">Name</span> <small class="ms-3"><?php echo $person["firstname"]." ".$person["lastname"]?></small> </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div> <span class="fw-bolder">NOD</span> <small class="ms-3">28</small> </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div> <span class="fw-bolder">ESI No.</span> <small class="ms-3"></small> </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div> <span class="fw-bolder">Mode of Pay</span> <small class="ms-3">Transfer</small> </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div> <span class="fw-bolder">Designation</span> <small class="ms-3">Staff</small> </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div> <span class="fw-bolder">Ac No.</span> <small class="ms-3">*******0701</small> </div>
-                                    </div>
+                                    </div>                    
                                 </div>
                             </div>
                             <table class="mt-4 table table-bordered">

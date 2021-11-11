@@ -69,11 +69,12 @@ function create_tax_data($tax_data_file,$currency_of_file){ //can crate array of
 
     if ($currency_of_file !==  $GLOBALS["working_currency"]){
         foreach($taxdata as $key=>&$tax_band){
-            if($key == "tax_band_1"){
+    
+            if($key == array_key_first($taxdata)){
                 $tax_band["maxsalary"] = round(exchange_currency($tax_band["maxsalary"],$currency_of_file),2);
                 continue;
             }
-            if($key == "tax_band_4"){
+            if($key == array_key_last($taxdata)){
                 $tax_band["minsalary"] = round(exchange_currency($tax_band["minsalary"],$currency_of_file),2);
                 continue;
                 }   
@@ -120,7 +121,7 @@ function calculate_standard_tax($person, $currency){ //passes in person (array) 
         
         foreach($tax_information as $tax_band=>$tax_data){ //loop through each tax band
             if($person_tax_band == $tax_band){
-                if($tax_band !== "tax_band_1"){ //tax band one assumes no tax should be deducted (personal allowance)
+                if($tax_data["rate"] !== 0){ //if person is tax_band_1, will only calc if there is
                     $tax_deductable += $salary*($tax_data["rate"]/100); // if applicable, the persons salary should sit on this band, meaning it is a percentage of what is left
                     $net_salary -= $tax_deductable; //removes the tax from total salary to work out net.
                 }
@@ -158,7 +159,7 @@ function calculate_standard_tax($person, $currency){ //passes in person (array) 
                     }
         }else{
             //exceptions center. in this case for the project, people in tax band 4 earn 50% personal allowance, and dont get any if they have a car. added check for currency incase I want to add other exceptions.
-            if($tax_band == "tax_band_1"){
+            if($tax_band == "tax_band_1" && $currency == "GBP"){
                 if($person_tax_band == "tax_band_4" && $person["companycar"]=="y"){
                     continue;
                 }elseif($person["companycar"]=="y"){
@@ -446,7 +447,7 @@ function check_tax_files($dir,$for_form = false){
 
                 if(preg_match("/tax-tables_EUR/",$file) !== 0){
                     if(preg_match("/(^tax-tables)/",$file) !== 0)
-                        $temp = array("file"=>$file, "reigon"=>"European", "code" => "EUR");
+                        $temp = array("file"=>$file, "reigon"=>"French", "code" => "EUR");
                         array_push($returned_files,$temp);
                 }
             }
