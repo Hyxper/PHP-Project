@@ -464,4 +464,13 @@ function check_tax_files($dir,$for_form = false){
     }  
 }
 
+
+function create_check_project_file($filename){
+    $filepath = __DIR__."/JSON/".$filename;
+    if (file_exists($filepath)) {
+        return;
+    } else {
+        copy(__DIR__."/JSON/tax-tables.json",$filepath);
+    }
+}
 ?>

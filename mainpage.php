@@ -1,13 +1,18 @@
 <?php 
 require __DIR__ . '/functions.php';
 session_start();
+create_check_project_file("tax-tables_GBP.json");
 set_timezone("GMT");
 $json_file_locations = "./JSON/";
 
             if(isset($_POST["currency_sel"])==false && isset($_POST["tax_sel"])==false){ //SETS DEFAULT VALUES FOR FORM NEEDS TO BE DEFAULT ON LOAD
                 $selectedcur = "GBP";
                 $selectedtax = "British";
-                $file_to_load=array("file" => $json_file_locations."tax-tables.json", "currency"=>"GBP");
+                foreach(check_tax_files($json_file_locations,true) as $tax_file){ //decode what I have put into tax select, makes sure right tax data is loaded.
+                    if ($tax_file["reigon"] == $selectedtax){
+                        $file_to_load=array("file" => $json_file_locations.$tax_file["file"], "currency"=> $tax_file["code"]);
+                    }
+                }
             }else{ //if post files have already been set, feed them into the right channels
                 $selectedcur = $_POST["currency_sel"];
                 $selectedtax = $_POST["tax_sel"];

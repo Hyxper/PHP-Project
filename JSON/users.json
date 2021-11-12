@@ -11,36 +11,6 @@
 		"username": "User",
         "password": "password",
         "permission": "standard"
-	},
-
-    {
-		"username": "user1",
-        "password": "password",
-        "permission": "restricted"
-	},
-    
-    {
-		"username": "user2",
-        "password": "password",
-        "permission": "restricted"
-	},
-
-    {
-		"username": "user3",
-        "password": "password",
-        "permission": "restricted"
-	},
-
-    {
-		"username": "user4",
-        "password": "password",
-        "permission": "restricted"
-	},
-
-    {
-		"username": "user5",
-        "password": "password",
-        "permission": "restricted"
 	}
 
  ]

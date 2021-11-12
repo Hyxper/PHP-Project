@@ -1,0 +1,37 @@
+[{
+		"id": 1,
+		"name": "Tax free",
+		"description": "First £10,000 is tax free",
+		"minsalary": 1,
+		"maxsalary": 10000,
+		"rate": 0
+	},
+
+	{
+		"id": 2,
+		"name": "Basic rate",
+		"description": "£10,000.01 to £40,000 is taxed at 20%",
+		"minsalary": 10000.01,
+		"maxsalary": 40000,
+		"rate": 20
+	},
+
+ 	{
+		"id": 3,
+		"name": "Higher rate",
+		"description": "£40,000.01 to £150,000 is taxed at 40%",
+		"minsalary": 40000.01,
+		"maxsalary": 150000,
+		"rate": 40
+	},
+
+    {
+		"id": 4,
+		"name": "Super rate",
+		"description": "over £150,000 is taxed at 50%. Initial £10,00 tax free allowance is reduced by 50%",
+		"minsalary": 150000.01,
+		"maxsalary": 9999999999999,
+		"rate": 50
+	}
+
+]
