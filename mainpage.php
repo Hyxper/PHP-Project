@@ -5,14 +5,20 @@ create_check_project_file("tax-tables_GBP.json");
 set_timezone("GMT");
 $json_file_locations = "./JSON/";
 
+
+
+
+
             if(isset($_POST["currency_sel"])==false && isset($_POST["tax_sel"])==false){ //SETS DEFAULT VALUES FOR FORM NEEDS TO BE DEFAULT ON LOAD
-                $selectedcur = "GBP";
-                $selectedtax = "British";
+                $selectedcur = "GBP"; //default
+                $selectedtax = "British"; //default
                 foreach(check_tax_files($json_file_locations,true) as $tax_file){ //decode what I have put into tax select, makes sure right tax data is loaded.
                     if ($tax_file["reigon"] == $selectedtax){
                         $file_to_load=array("file" => $json_file_locations.$tax_file["file"], "currency"=> $tax_file["code"]);
                     }
                 }
+
+
             }else{ //if post files have already been set, feed them into the right channels
                 $selectedcur = $_POST["currency_sel"];
                 $selectedtax = $_POST["tax_sel"];
@@ -97,19 +103,16 @@ $json_file_locations = "./JSON/";
                     <table class='table table-bordered table-light table-hover table-striped text-center'>
                         <thead class='text-center'>
                         <tr>
-                            <th scope='col'>ID</th>
-                            <th scope='col'>Photo</th>
-                            <th scope='col'>Surname</th>
-                            <th scope='col'>First name</th>
-                            <th scope='col'>Job title</th>
-                            <th scope='col'>Department</th>
-                            <th scope='col'>Salary</th>
-                            <th scope='col'>Tax per year</th>
-                            <th scope='col'>Net per year</th>
-                            <th scope='col'>Salary per month</th>
-                            <th scope='col'>Tax per month</th>
-                            <th scope='col'>Net pay per month</th>
-                            <th scope='col'>Records</th>
+                            <?php
+                            $rownames = array("ID","Photo","Surname","First name","Job title", "Department", "Salary",
+                            "Tax per year", "Net per year", "Salary per month", "Tax per month", "Net per month", 
+                            "Records");
+
+                            foreach ($rownames as $row){
+                                echo "<th scope='col'>".$row."</th>";
+                            }
+                            
+                            ?>
                         </tr>
                         </thead>
                         <tbody>
@@ -145,7 +148,9 @@ $json_file_locations = "./JSON/";
                 <td id='".$ID_name."_salary_per_month'>".$returned_values["salary_month"]."</td>
                 <td id='".$ID_name."_tax_per_month'class='text-danger'>".$returned_values["tax_month"]."</td>
                 <td id='".$ID_name."_salary_per_month' class='text-success'>".$returned_values["net_salary_month"]."</td>
-                <td id='".$ID_name."_Records' class='text-success'><a href='person.php?person=".$ID_name."'><ul>View Record</ul></a></td>
+                <td id='".$ID_name."_Records'>
+                <a href='person.php?person=".$ID_name."'><button class='btn p-2 mt-4 btn-warning' type='submit' name='submit'>View Record</button></a>
+                </td>
             </tr>";
         }
         ?>

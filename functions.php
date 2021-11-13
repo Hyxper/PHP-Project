@@ -126,13 +126,11 @@ function calculate_standard_tax($person, $currency){ //passes in person (array) 
                     $net_salary -= $tax_deductable; //removes the tax from total salary to work out net.
                 }
                     try{
-                        if($currency=="GBP"){ //if currency was converted, convert back  (only if default GBP is set as currency)
+                        
+                        //asigns array to be returned, contains all info needed to inform whomever on tax information.
+                        if($currency == "GBP"){//if currency was converted, convert back  (only if default GBP is set as currency)
                             $tax_deductable=exchange_currency($tax_deductable,$current_working_currency,true);//exchange back to working currency
                             $net_salary=exchange_currency($net_salary,$current_working_currency,true); //true indicates to revert the calculation
-                        }
-
-                        //asigns array to be returned, contains all info needed to inform whomever on tax information.
-                        if($currency == "GBP"){
                             $calculated_values["salary_year"] = $person["salary"];
                             $calculated_values["salary_month"] = $calculated_values["salary_year"]/12;
                         }else{
@@ -322,7 +320,7 @@ function currency_conversion($currency_convert_from){ //creates an array of curr
             CURLOPT_URL => $URL,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_SSL_VERIFYHOST => 0,
+            CURLOPT_SSL_VERIFYHOST => 0, //had to add to bypass cert checks on uni PC, security risk
             CURLOPT_SSL_VERIFYPEER => 0,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
@@ -433,20 +431,15 @@ function check_tax_files($dir,$for_form = false){
     if($for_form == true){
         foreach(scandir($dir) as $file){
             if(preg_match("/tax-tables/",$file) !== 0){
-
-                if(preg_match("/tax-tables\.json/",$file) !== 0){
+                if(preg_match("/tax-tables_GBP/",$file) !== 0){
                     $temp = array("file"=>$file, "reigon"=>"British", "code" => "GBP");
                     array_push($returned_files,$temp);
                 }
-
                 if(preg_match("/tax-tables_USD/",$file) !== 0){
-                    if(preg_match("/(^tax-tables)/",$file) !== 0)
                         $temp = array("file"=>$file, "reigon"=>"American", "code" => "USD");
                         array_push($returned_files,$temp);
                 }
-
                 if(preg_match("/tax-tables_EUR/",$file) !== 0){
-                    if(preg_match("/(^tax-tables)/",$file) !== 0)
                         $temp = array("file"=>$file, "reigon"=>"French", "code" => "EUR");
                         array_push($returned_files,$temp);
                 }

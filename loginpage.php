@@ -56,9 +56,8 @@
                 <label class="form-label" for="typePassword">Password</label>
               </div>
               
-              <form action="test.php">
-              <button class="btn btn-lg px-5" type="submit" name="submit">Login</button>
-              </form>
+              <form action="verifyuser.php" method="POST">
+              <button class="btn btn-outline-light btn-lg px-5" type="submit" name="submit">Login</button>
 
             </div>
           </div>
