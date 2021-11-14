@@ -38,7 +38,7 @@ if($_SESSION["usercreds"] == 1 or $_SESSION["usercreds"] == 2){
         header('Location: ' . $_SERVER['HTTP_REFERER']); //this returns the user to the login page informing of either unknown user or wrong password
         exit; //need exit after each header call so page does not continue loading
     }else{     
-        $_SESSION["userdetails"] = array("user"=>$user["username"], "permission" => $user["permission"]);
+        $_SESSION["userdetails"] = array("user"=>$user["username"]);
         header("location: mainpage.php"); //this will send the user to the main page, ideal outcome as both username and password were correct
         exit; //need exit after each header call so page does not continue loading
 }

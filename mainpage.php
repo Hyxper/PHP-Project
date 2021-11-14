@@ -5,9 +5,10 @@ create_check_project_file("tax-tables_GBP.json");
 set_timezone("GMT");
 $json_file_locations = "./JSON/";
 
-
-
-
+            if(isset($_SESSION["userdetails"])==false){
+                echo "Please login through login page first!";
+                exit;
+            }
 
             if(isset($_POST["currency_sel"])==false && isset($_POST["tax_sel"])==false){ //SETS DEFAULT VALUES FOR FORM NEEDS TO BE DEFAULT ON LOAD
                 $selectedcur = "GBP"; //default
@@ -55,14 +56,20 @@ $json_file_locations = "./JSON/";
     <title>Main Page</title>
 </head>
 <body>
-        <nav class='navbar navbar-light bg-warning justify-content-center h2 mb-0'>
-        <span class='navbar-brand mb-0'><h1>Pegasus</h1></span>
+        <nav class='navbar navbar-light bg-dark justify-content-center h2 mb-4 border-secondary border-5 border-bottom'>
+            <span class='navbar-brand mb-0 text-light'><h1>Pegasus</h1></span>
         </nav>      
     <main>
         <div class="container-fluid">
             <div class="row d-flex justify-content-center">
-                <div class="container d-flex w-50 border border-secondary flex-row justify-content-center">
-                    <form class="form d-flex flex-row" action="mainpage.php" method="POST">
+                <div class="container d-flex w-25 justify-content-center">
+
+
+                <div class="container w-50">
+                    <form class="form" action="mainpage.php" method="POST">
+
+
+                <div class="row">
                         <div class="form-group p-2">
                             <label for="currency_sel">Select Currency:</label>
                             <select type="text" class="form-control" id="currency_sel" name="currency_sel">
@@ -74,6 +81,10 @@ $json_file_locations = "./JSON/";
                                 ?>
                             </select>
                         </div>
+
+
+
+
                         <div class="form-group p-2">
                             <label for="tax_sel">Select Tax Band:</label>
                             <select type="text" class="form-control" id="tax_sel" name="tax_sel">
@@ -84,17 +95,21 @@ $json_file_locations = "./JSON/";
                                 ?>
                             </select>
                         </div>
-                        <div class="row">
-                        <button class="btn btn-primary m-5" type="submit" name="submit">Submit</button>
-                        </div>
+
+                            
+                </div>
+
+                <div class="row py-2">
+                        <button class="btn btn-primary" type="submit" name="submit">Submit</button>
+                </div>
                        
                     </form>
-                    <div class="d-flex align-items-center justify-content-center px-5 flex-column">
-                        <?php echo "<h5> Current Currency: ".$selectedcur."</h5>" ?>
-                        <?php echo "<h5> Current Tax: ".$selectedtax."</h5>" ?>
-                    </div>          
-                </div>
-                
+                    </div>
+
+                    <div class="container d-flex align-items-center justify-content-center flex-column">
+                       <?php echo "<h5> Current Currency: ".$selectedcur."</h5>" ?>
+                       <?php echo "<h5> Current Tax: ".$selectedtax."</h5>" ?>                
+                    </div>
              </div>
         </div>
             <div class="row d-flex">
@@ -149,7 +164,7 @@ $json_file_locations = "./JSON/";
                 <td id='".$ID_name."_tax_per_month'class='text-danger'>".$returned_values["tax_month"]."</td>
                 <td id='".$ID_name."_salary_per_month' class='text-success'>".$returned_values["net_salary_month"]."</td>
                 <td id='".$ID_name."_Records'>
-                <a href='person.php?person=".$ID_name."'><button class='btn p-2 mt-4 btn-warning' type='submit' name='submit'>View Record</button></a>
+                <a href='person.php?person=".$ID_name."'><button class='btn p-2 mt-4 btn-dark' type='submit' name='submit'>View Record</button></a>
                 </td>
             </tr>";
         }
