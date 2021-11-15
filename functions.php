@@ -32,7 +32,7 @@ function create_personel_data($currency_to_work_in){ // creates data for each pe
     
     
     foreach($personeldata as $key=>$person){
-        if($person["currency"]!==$currency_to_work_in){
+        if($person["currency"]!==$currency_to_work_in){ //exchange salary so person meets the tax bands correctly
             $salarytocheck = exchange_currency($person["salary"],$person["currency"]);
         }else{
             $salarytocheck = $person["salary"];     
@@ -67,7 +67,7 @@ function create_tax_data($tax_data_file,$currency_of_file){ //can crate array of
         $elementrename=""; 
     } //this creates an array from tax rate JSON, renaming the parent element to the tax band, and removing the name elemen
 
-    if ($currency_of_file !==  $GLOBALS["working_currency"]){
+    if ($currency_of_file !==  $GLOBALS["working_currency"]){ //if the files currency does not match the working currency, work out what the tax bands should be to apply correctly.
         foreach($taxdata as $key=>&$tax_band){
     
             if($key == array_key_first($taxdata)){
@@ -247,7 +247,7 @@ function exchange_currency($amount,$exchange_currency,$revert = false){ //this t
     foreach($rates as $currency=>$value){
         if(strcmp($currency,$exchange_currency)!==0){
             $check_if_exists += 1;  
-        }
+        } //counter to check if supplied exchange currency matches a supported currency frim "currency rates"
     }
     if($check_if_exists == count($rates)){
         throw new Exception(available_functions($rates,"'".$exchange_currency."' is not supported for coversion. Supported currencies are:")); //will complain if supplied currency is not supported
@@ -316,7 +316,7 @@ function currency_conversion($currency_convert_from){ //creates an array of curr
  function api_invoke($URL, $api_key,$err_msg="error"){
 
         $curl = curl_init();
-        curl_setopt_array($curl, [
+        curl_setopt_array($curl, [ //sets rules to follow when making a cURL request.
             CURLOPT_URL => $URL,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
@@ -368,7 +368,7 @@ function available_functions($functions,$message=""){ //will just tell you what 
         echo "</ul>";
 }
 
-function is_json($file){
+function is_json($file){ //checks if a file is JSON. First checks the last error recieved from decoding file, if it not JSON_ERROR_NONE, or any other message then complain
     $json = file_get_contents($file);
     json_decode($json);
     if(json_last_error() !== JSON_ERROR_NONE){
@@ -380,11 +380,11 @@ function is_json($file){
     return true;
  }
 
-function verify_tax_file($file){
+function verify_tax_file($file){ //loads the passed file (file containing tax data), and checks to see if it complies with the required structure. If it does not moan and return to user
     $json = file_get_contents($file);
     $contents = json_decode($json,true);
 
-    foreach($contents as $key=>$criteria){
+    foreach($contents as $key=>$criteria){ //goes through each element and tries to catch if element exists, and if it does if its content is correct.
         if(array_key_exists("id",$criteria)){
             if(!is_numeric($criteria["id"])){
                 throw new Exception("value in element ".$key." for ID is invalid");
@@ -424,13 +424,13 @@ function set_timezone($timezone){ //if timezone has not been set in session, set
 }
 
 
-function check_tax_files($dir,$for_form = false){
+function check_tax_files($dir,$for_form = false){ //checks what tax files exist, using "tax_tables" as a naming convention. Can be supplied with True optionally to load data to be displayed
     $returned_files = array();
     $temp = array();
 
     if($for_form == true){
         foreach(scandir($dir) as $file){
-            if(preg_match("/tax-tables/",$file) !== 0){
+            if(preg_match("/tax-tables/",$file) !== 0){ //this part could easily be done with javascript!!!!
                 if(preg_match("/tax-tables_GBP/",$file) !== 0){
                     $temp = array("file"=>$file, "reigon"=>"British", "code" => "GBP");
                     array_push($returned_files,$temp);

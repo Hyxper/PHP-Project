@@ -43,5 +43,4 @@ if($_SESSION["usercreds"] == 1 or $_SESSION["usercreds"] == 2){
         exit; //need exit after each header call so page does not continue loading
 }
 
-
 ?>

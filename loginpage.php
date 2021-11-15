@@ -26,7 +26,7 @@
               
                 <?php
                 require __DIR__ . '/functions.php';
-                session_start();
+                session_start(); //starts session ,on return of invalid credentials, checks what was wrong.
                 set_timezone("GMT");
                 if(isset($_SESSION["usercreds"])){ 
                     if($_SESSION["usercreds"] == 1){

@@ -15,6 +15,11 @@
         session_start();
         require __DIR__ . '/functions.php';
         set_timezone("GMT");
+
+        if(isset($_SESSION["userdetails"])==false){
+            header("location: redirect.php");
+            exit;
+        }
         $person = $_GET["person"];
         if (isset($_SESSION[$person])){
             $person = $_SESSION[$person];
@@ -24,18 +29,18 @@
 
 
        
-        <nav class='navbar navbar-light bg-warning justify-content-center h2 mb-0'>
-        <span class='navbar-brand mb-0'>Jack's PHP Project</span>
-        </nav>
-        
+        <nav class='navbar navbar-light bg-dark justify-content-center h2 mb-4 border-secondary border-5 border-bottom'>
+            <span class='navbar-brand mb-0 text-light'><h1>Pegasus</h1></span>
+        </nav>      
+        <div class="row">
+            <form action="mainpage.php" class="px-5">
+                    <button class="btn btn-success" type="submit" name="submit">Back to main page</button>
+            </form>
+
+        </div>
         <div class="container-fluid vh-100">
 
             <div class="d-flex flex-row h-50">
-
-                <div class="col-2 d-flex align-items-center justify-content-center h-100">
-                     <a href='https://placeholder.com'><img src='https://via.placeholder.com/300' class=""></a>
-                </div>
-
                 <div class="col-5 h-100 d-flex justify-content-center align-items-center flex-column">
                     <h3><u>Personal Info</u></h3>
                     <div class="container d-flex flex-column flex-wrap h-75 justify-content-center align-items-center">
@@ -81,7 +86,9 @@
                     </div>
                     
                 </div>
-
+                <div class="col-2 d-flex align-items-center justify-content-center h-100">
+                     <img src= <?php echo "https://avatars.dicebear.com/api/human/".$_GET["person"].".svg"?> class="">
+                </div>
                 <div class="col-5 h-100 d-flex justify-content-center align-items-center flex-column">
                     <h3><u>Employment Info</u></h3>
                     <div class="container d-flex flex-column flex-wrap h-75 justify-content-center align-items-center">
@@ -143,10 +150,15 @@
             <div class="d-flex flex-row h-50"> 
 <!-- Template copied from https://bbbootstrap.com/snippets/bootstrap-5-employee-salary-slip-template-16254247  -->
             <div class="container mt-5 mb-5">
+                <div class="row pb-5">
                 <div class="row">
-                    <div class="col-md-12">
+                          <form action="pdf_gen.php" class="text-center pb-2">
+                             <button class="btn btn-lg btn-danger px-5" type="submit" name="submit">Download payslip as PDF</button>
+                         </form>
+                    </div>
+                    <div class="col-md-12 border border-secondary">
                         <div class="text-center lh-1 mb-2">
-                            <h6 class="fw-bold">Payslip</h6> <span class="fw-normal">Payment slip for the month of June 2021</span>
+                            <h6 class="fw-bold pt-2">Payslip</h6> <span class="fw-normal">Payment slip for the month of June 2021</span>
                         </div>
         
                         <div class="row">
@@ -158,7 +170,7 @@
                                 </div>
                             </div>
                             <table class="mt-4 table table-bordered">
-                                <thead class="bg-dark text-white">
+                                <thead class="bg-dark text-white mx-2">
                                     <tr>
                                         <th scope="col">Earnings</th>
                                         <th scope="col">Amount</th>
@@ -212,16 +224,8 @@
                         </div>
                     </div>
                 </div>
-
-                <form action="pdf_gen.php">
-                    <button class="btn btn-lg px-5" type="submit" name="submit">Login</button>
-                </form>
-
-                <form action="mainpage.php">
-                    <button class="btn px-5" type="submit" name="submit">back</button>
-                </form>
-
             </div>
+          
         </div>
     </div>
 

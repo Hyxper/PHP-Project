@@ -6,7 +6,7 @@ set_timezone("GMT");
 $json_file_locations = "./JSON/";
 
             if(isset($_SESSION["userdetails"])==false){
-                echo "Please login through login page first!";
+                header("location: redirect.php");
                 exit;
             }
 
@@ -148,11 +148,12 @@ $json_file_locations = "./JSON/";
             $ID_name = $person["id"]."_".$person["firstname"]."_".$person["lastname"];
             $_SESSION[$ID_name] = $person; //$returned_values;
             $_SESSION[$ID_name]["calculated_salary_and_tax_info"]=$returned_values;
+
              echo
              "
             <tr>
                 <th scope='row' id='".$ID_name."_ID'>".$person["id"]."</th>
-                <td id='".$ID_name."_photo' class='text-center'> <a href='https://placeholder.com'><img src='https://via.placeholder.com/100'></td>
+                <td id='".$ID_name."_photo' class='text-center'> <img src='https://avatars.dicebear.com/api/human/".$ID_name.".svg'></td>
                 <td id='".$ID_name."_lastname'>".$person["lastname"]."</td>
                 <td id='".$ID_name."_firstname'>".$person["firstname"]."</td>
                 <td id='".$ID_name."_jobtitle'>".$person["jobtitle"]."</td>
@@ -164,7 +165,7 @@ $json_file_locations = "./JSON/";
                 <td id='".$ID_name."_tax_per_month'class='text-danger'>".$returned_values["tax_month"]."</td>
                 <td id='".$ID_name."_salary_per_month' class='text-success'>".$returned_values["net_salary_month"]."</td>
                 <td id='".$ID_name."_Records'>
-                <a href='person.php?person=".$ID_name."'><button class='btn p-2 mt-4 btn-dark' type='submit' name='submit'>View Record</button></a>
+                <a href='person.php?person=".$ID_name."'><button class='btn p-2 m-2 btn-dark' type='submit' name='submit'>View Record</button></a>
                 </td>
             </tr>";
         }

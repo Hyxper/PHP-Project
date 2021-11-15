@@ -1,20 +1,30 @@
 <?php
 
+//this generates a PDF, uses data set in the session array. This is created from the person php file. works with DOMPDF.
+
+
 session_start();
 require __DIR__ . '/dompdf/autoload.inc.php';
 
-if (isset( $_SESSION["pdf_details"])==false){
+if(isset($_SESSION["userdetails"])==false){ //check person has logged in
+    header("location: redirect.php");
+    exit;
+}
+
+if (isset( $_SESSION["pdf_details"])==false){ //if details are not set, (someone trying to access this directly), tell them to leave
     echo "ERROR: details to generate PDF have not been set.";
     exit;
 }
 
-$details = $_SESSION["pdf_details"];
+$details = $_SESSION["pdf_details"]; //copy details
 
-use Dompdf\Dompdf;
+use Dompdf\Dompdf; //give alias
 
 // instantiate and use the dompdf class
-$dompdf = new Dompdf();
-$dompdf->loadHtml('
+$dompdf = new Dompdf(); //create new dompdf object
+
+//this is a table written in HTML. DOMPDF requires a string of HTML to create the PDF
+$dompdf->loadHtml('     
 <style>
 table {
   font-family: arial, sans-serif;
@@ -133,7 +143,7 @@ $dompdf->setPaper('A4', 'portrait');
 // Render the HTML as PDF
 $dompdf->render();
 
-// Output the generated PDF to Browser
+// Output the generated PDF to Browser, added option to save as a file with persons ID as file name.
 $dompdf->stream($details["id"]."_"."payslip")
 
 ?>
