@@ -18,18 +18,18 @@ function create_personel_data($currency_to_work_in){ // creates data for each pe
         $personeldatapre = json_decode($json,true);
     }
     
-    foreach($personeldatapre as $person){
-        $elementrename =  $person["id"]."_".$person["firstname"]."_".$person["lastname"];
-        $personeldata[$elementrename] = $person;
-        $elementrename=""; 
-    } //this adds the ID, firstname and last name to the parent array element, rather than normal.
- 
     if(isset($GLOBALS["tax_data"])==false){
         throw new Exception("tax data is not set!");
     }else{
         $taxdata = $GLOBALS["tax_data"];
     }
     
+    foreach($personeldatapre as $person){
+        $elementrename =  $person["id"]."_".$person["firstname"]."_".$person["lastname"];
+        $personeldata[$elementrename] = $person;
+        $elementrename=""; 
+    } //this adds the ID, firstname and last name to the parent array element, rather than normal.
+ 
     
     foreach($personeldata as $key=>$person){
         if($person["currency"]!==$currency_to_work_in){ //exchange salary so person meets the tax bands correctly
@@ -45,6 +45,8 @@ function create_personel_data($currency_to_work_in){ // creates data for each pe
                 }
             }
         }
+
+        if (isset($personeldata[$key]["tax_band"])==false) throw new Exception("Error when declaring taxbands - ".$key." tax band could not be set.");
 
     }
     //appends tax band to each employee, for tax calculation function.

@@ -24,6 +24,9 @@
         if (isset($_SESSION[$person])){
             $person = $_SESSION[$person];
             $_SESSION["pdf_details"] = $person;
+        }else{
+            echo "Info for regarding this URL is unavailable";
+            exit;
         }
     ?>  
 
