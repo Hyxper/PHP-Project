@@ -70,16 +70,25 @@ function create_tax_data($tax_data_file,$currency_of_file){ //can crate array of
     } //this creates an array from tax rate JSON, renaming the parent element to the tax band, and removing the name elemen
 
     if ($currency_of_file !==  $GLOBALS["working_currency"]){ //if the files currency does not match the working currency, work out what the tax bands should be to apply correctly.
+        
+        //first and last key in here.
+        end($taxdata);
+        $lastelem= key($taxdata);
+        reset($taxdata);
+        $firstelem = key($taxdata);
+        
+        
         foreach($taxdata as $key=>&$tax_band){
     
-            if($key == array_key_first($taxdata)){
+            if($key == $firstelem){
                 $tax_band["maxsalary"] = round(exchange_currency($tax_band["maxsalary"],$currency_of_file),2);
                 continue;
             }
-            if($key == array_key_last($taxdata)){
+            if($key == $lastelem){
                 $tax_band["minsalary"] = round(exchange_currency($tax_band["minsalary"],$currency_of_file),2);
                 continue;
-                }   
+                } 
+                  
            $tax_band["minsalary"] = round(exchange_currency($tax_band["minsalary"],$currency_of_file),2);
            $tax_band["maxsalary"] = round(exchange_currency($tax_band["maxsalary"],$currency_of_file),2);
            
