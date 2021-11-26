@@ -76,13 +76,7 @@ function create_tax_data($tax_data_file,$currency_of_file){ //can crate array of
         $lastelem= key($taxdata);
         reset($taxdata);
         $firstelem = key($taxdata);
-<<<<<<< HEAD
 
-        echo $lastelem."<br>";
-        echo $firstelem."<br>";
-=======
-    
->>>>>>> ff2a3c90e781372a827533769459fa85930864aa
         
         foreach($taxdata as $key=>&$tax_band){
          
