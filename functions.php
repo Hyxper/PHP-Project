@@ -76,10 +76,10 @@ function create_tax_data($tax_data_file,$currency_of_file){ //can crate array of
         $lastelem= key($taxdata);
         reset($taxdata);
         $firstelem = key($taxdata);
-        
+    
         
         foreach($taxdata as $key=>&$tax_band){
-    
+         
             if($key == $firstelem){
                 $tax_band["maxsalary"] = round(exchange_currency($tax_band["maxsalary"],$currency_of_file),2);
                 continue;
